@@ -48,28 +48,28 @@ npm install finprim zod
 ### Validation
 
 ```ts
-import { validateIBAN, validateUKSortCode, validateUKAccountNumber } from "finprim";
+import { validateIBAN, validateUKSortCode, validateUKAccountNumber } from 'finprim'
 
-const iban = validateIBAN("GB29NWBK60161331926819");
+const iban = validateIBAN('GB29NWBK60161331926819')
 // { valid: true, country: 'GB', formatted: 'GB29 NWBK 6016 1331 9268 19' }
 
-const sortCode = validateUKSortCode("60-16-13");
+const sortCode = validateUKSortCode('60-16-13')
 // { valid: true, formatted: '60-16-13', digits: '601613' }
 
-const account = validateUKAccountNumber("31926819");
+const account = validateUKAccountNumber('31926819')
 // { valid: true }
 ```
 
 ### Currency Formatting
 
 ```ts
-import { formatCurrency, parseMoney } from "finprim";
+import { formatCurrency, parseMoney } from 'finprim'
 
-formatCurrency(1000.5, "GBP", "en-GB"); // '£1,000.50'
-formatCurrency(1000.5, "EUR", "de-DE"); // '1.000,50 €'
-formatCurrency(1000.5, "USD", "en-US"); // '$1,000.50'
+formatCurrency(1000.5, 'GBP', 'en-GB')  // '£1,000.50'
+formatCurrency(1000.5, 'EUR', 'de-DE')  // '1.000,50 €'
+formatCurrency(1000.5, 'USD', 'en-US')  // '$1,000.50'
 
-parseMoney("£1,000.50"); // { amount: 1000.50, currency: 'GBP', valid: true }
+parseMoney('£1,000.50')  // { amount: 1000.50, currency: 'GBP', valid: true }
 ```
 
 ### Branded Types
@@ -90,7 +90,7 @@ if (iban.valid) {
 ### Zod Schemas
 
 ```ts
-import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema } from "finprim/zod";
+import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema } from 'finprim/zod'
 
 const PaymentSchema = z.object({
   iban: ibanSchema,
@@ -98,7 +98,7 @@ const PaymentSchema = z.object({
   accountNumber: accountNumberSchema,
   amount: z.number().positive(),
   currency: currencySchema,
-});
+})
 ```
 
 ### React Hooks
@@ -126,31 +126,31 @@ function PaymentForm() {
 
 ### Validation
 
-| Function                         | Input    | Returns          |
-| -------------------------------- | -------- | ---------------- |
-| `validateIBAN(input)`            | `string` | `IBANResult`     |
-| `validateUKSortCode(input)`      | `string` | `SortCodeResult` |
-| `validateUKAccountNumber(input)` | `string` | `AccountResult`  |
-| `validateCurrencyCode(input)`    | `string` | `CurrencyResult` |
+| Function | Input | Returns |
+|---|---|---|
+| `validateIBAN(input)` | `string` | `IBANResult` |
+| `validateUKSortCode(input)` | `string` | `SortCodeResult` |
+| `validateUKAccountNumber(input)` | `string` | `AccountResult` |
+| `validateCurrencyCode(input)` | `string` | `CurrencyResult` |
 
 ### Formatting
 
-| Function                                   | Input                    | Returns       |
-| ------------------------------------------ | ------------------------ | ------------- |
-| `formatCurrency(amount, currency, locale)` | `number, string, string` | `string`      |
-| `formatIBAN(input)`                        | `string`                 | `string`      |
-| `formatSortCode(input)`                    | `string`                 | `string`      |
-| `parseMoney(input)`                        | `string`                 | `MoneyResult` |
+| Function | Input | Returns |
+|---|---|---|
+| `formatCurrency(amount, currency, locale)` | `number, string, string` | `string` |
+| `formatIBAN(input)` | `string` | `string` |
+| `formatSortCode(input)` | `string` | `string` |
+| `parseMoney(input)` | `string` | `MoneyResult` |
 
 ---
 
 ## Packages
 
-| Import path     | What it contains               | Extra dependency |
-| --------------- | ------------------------------ | ---------------- |
-| `finprim`       | Core validators and formatters | none             |
-| `finprim/zod`   | Zod schemas                    | `zod`            |
-| `finprim/react` | React hooks                    | `react`          |
+| Import path | What it contains | Extra dependency |
+|---|---|---|
+| `finprim` | Core validators and formatters | none |
+| `finprim/zod` | Zod schemas | `zod` |
+| `finprim/react` | React hooks | `react` |
 
 ---
 
@@ -186,3 +186,7 @@ npm run dev
 ```
 
 ---
+
+## License
+
+MIT

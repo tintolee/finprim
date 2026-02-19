@@ -1,0 +1,74 @@
+{
+  "name": "finprim",
+  "version": "0.1.0",
+  "description": "Financial primitives for modern TypeScript applications",
+  "author": "Oluwatosin Adelaja",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tintolee/finprim.git"
+  },
+  "homepage": "https://github.com/tintolee/finprim#readme",
+  "keywords": [
+    "fintech",
+    "typescript",
+    "iban",
+    "sort-code",
+    "currency",
+    "validation",
+    "formatting",
+    "financial",
+    "primitives",
+    "zod"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./zod": {
+      "import": "./dist/zod/index.mjs",
+      "require": "./dist/zod/index.js",
+      "types": "./dist/zod/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsup": "^8.0.0",
+    "vitest": "^1.6.0",
+    "zod": "^3.23.0",
+    "react": "^18.0.0",
+    "@types/react": "^18.0.0"
+  },
+  "peerDependencies": {
+    "zod": ">=3.0.0",
+    "react": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}
