@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { validateIBAN } from '../iban'
-import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
+import { validateUKSortCode, validateUKAccountNumber } from '../sortcode_and_account_number'
 import { formatCurrency } from '../currency'
 import { validateBIC } from '../bic'
 import type {

@@ -40,13 +40,17 @@ describe('validateIBAN', () => {
   it('fails if input is shorter than 4 characters', () => {
     const result = validateIBAN('GB2')
     expect(result.valid).toBe(false)
-    expect(result.error).toBe('IBAN is too short')
+    if (!result.valid) {
+      expect(result.error).toBe('IBAN is too short')
+    }
   })
 
   it('fails if length does not match country requirement', () => {
     const result = validateIBAN('GB29NWBK6016133192681') // one digit short
     expect(result.valid).toBe(false)
-    expect(result.error).toContain('Invalid length')
+    if (!result.valid) {
+      expect(result.error).toContain('Invalid length')
+    }
   })
 
   // -----------------------------
@@ -56,7 +60,9 @@ describe('validateIBAN', () => {
   it('fails for unsupported country code', () => {
     const result = validateIBAN('ZZ29NWBK60161331926819')
     expect(result.valid).toBe(false)
-    expect(result.error).toBe('Unsupported country code: ZZ')
+    if (!result.valid) {
+      expect(result.error).toBe('Unsupported country code: ZZ')
+    }
   })
 
   // -----------------------------
@@ -66,7 +72,9 @@ describe('validateIBAN', () => {
   it('fails if IBAN contains invalid characters', () => {
     const result = validateIBAN('GB29NWBK60161331926@19')
     expect(result.valid).toBe(false)
-    expect(result.error).toBe('IBAN contains invalid characters')
+    if (!result.valid) {
+      expect(result.error).toBe('IBAN contains invalid characters')
+    }
   })
 
   // -----------------------------
@@ -76,7 +84,9 @@ describe('validateIBAN', () => {
   it('fails if checksum is invalid', () => {
     const result = validateIBAN('GB29NWBK60161331926810') // modified last digit
     expect(result.valid).toBe(false)
-    expect(result.error).toBe('IBAN checksum is invalid')
+    if (!result.valid) {
+      expect(result.error).toBe('IBAN checksum is invalid')
+    }
   })
 
   // -----------------------------

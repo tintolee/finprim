@@ -20,6 +20,10 @@ export type {
   IBANValidationResult,
   IBANValidationSuccess,
   MoneyResult,
+  CreditCardNumber,
+  CardIssuer,
+  CreditCardValidationSuccess,
+  CreditCardValidationResult,
 } from './types'
 
 export type { CardNetwork, CardValidationResult } from './card'
