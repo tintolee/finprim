@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { InterestDemo } from './InterestDemo';
+import { InterestDemo } from './components/InterestDemo';
 import type { FinprimExample } from './types';
 import { IbanValidator } from './components/IbanValidator';
 
