@@ -182,6 +182,7 @@ Contributions are welcome. Please open an issue before submitting a pull request
 git clone https://github.com/YOUR_USERNAME/finprim
 cd finprim
 npm install
+npm test
 npm run dev
 ```
 
