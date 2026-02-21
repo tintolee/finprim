@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { validateIBAN } from '../iban'
-import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
+import { validateUKSortCode, validateUKAccountNumber } from '../sortcode_and_account_number'
 import { formatCurrency } from '../currency'
 import type { SupportedCurrency, ValidationResult, IBAN, SortCode, AccountNumber } from '../types'
 
@@ -47,7 +47,15 @@ export function useSortCodeInput() {
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value
     setValue(input)
-    setResult(validateUKSortCode(input))
+    if (input.length == 6) {
+      setResult(validateUKSortCode(input))
+    }
+    else if (input.length < 6) {
+      setResult(null)
+    }
+    else {
+      setResult({ valid: false, error: 'Sort code must be exactly 6 digits' })
+    }
   }, [])
 
   return {
