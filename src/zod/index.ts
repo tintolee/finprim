@@ -2,73 +2,67 @@ import { z } from 'zod'
 import { validateIBAN } from '../iban'
 import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
 import { validateCurrencyCode } from '../currency'
+import { validateBIC } from '../bic'
+import { validateCardNumber } from '../card'
 
-/**
- * Zod schema for IBAN validation.
- * Use this directly in your API request schemas.
- *
- * @example
- * const PaymentSchema = z.object({ iban: ibanSchema })
- */
-export const ibanSchema = z.string().refine(
-  (val) => validateIBAN(val).valid,
-  (val) => ({ message: (() => {
-    const result = validateIBAN(val)
-    return result.valid ? '' : result.error
-  })() })
-)
+function refineWith<T>(validator: (val: string) => { valid: boolean; error?: string }) {
+  return {
+    validate: (val: string) => validator(val).valid,
+    message: (val: string) => {
+      const result = validator(val)
+      return { message: result.valid ? '' : (result as { error: string }).error }
+    },
+  }
+}
 
-/**
- * Zod schema for UK sort code validation.
- * Accepts formats: 60-16-13, 601613, 60 16 13
- */
-export const sortCodeSchema = z.string().refine(
-  (val) => validateUKSortCode(val).valid,
-  (val) => ({ message: (() => {
-    const result = validateUKSortCode(val)
-    return result.valid ? '' : result.error
-  })() })
-)
 
-/**
- * Zod schema for UK account number validation.
- */
-export const accountNumberSchema = z.string().refine(
-  (val) => validateUKAccountNumber(val).valid,
-  (val) => ({ message: (() => {
-    const result = validateUKAccountNumber(val)
-    return result.valid ? '' : result.error
-  })() })
-)
+export const ibanSchema = z
+  .string()
+  .refine(refineWith(validateIBAN).validate, refineWith(validateIBAN).message)
 
-/**
- * Zod schema for supported currency codes.
- */
-export const currencySchema = z.string().refine(
-  (val) => validateCurrencyCode(val).valid,
-  (val) => ({ message: (() => {
-    const result = validateCurrencyCode(val)
-    return result.valid ? '' : result.error
-  })() })
-)
 
-/**
- * Zod schema for a complete UK payment.
- */
+export const sortCodeSchema = z
+  .string()
+  .refine(refineWith(validateUKSortCode).validate, refineWith(validateUKSortCode).message)
+
+
+export const accountNumberSchema = z
+  .string()
+  .refine(refineWith(validateUKAccountNumber).validate, refineWith(validateUKAccountNumber).message)
+
+
+export const currencySchema = z
+  .string()
+  .refine(refineWith(validateCurrencyCode).validate, refineWith(validateCurrencyCode).message)
+
+
+export const bicSchema = z
+  .string()
+  .refine(refineWith(validateBIC).validate, refineWith(validateBIC).message)
+
+
+export const cardNumberSchema = z
+  .string()
+  .refine(refineWith(validateCardNumber).validate, refineWith(validateCardNumber).message)
+
+
 export const ukPaymentSchema = z.object({
-  sortCode: sortCodeSchema,
+  sortCode:      sortCodeSchema,
   accountNumber: accountNumberSchema,
-  amount: z.number().positive('Amount must be greater than zero'),
-  currency: currencySchema,
-  reference: z.string().max(18).optional(),
+  amount:        z.number().positive('Amount must be greater than zero'),
+  currency:      currencySchema,
+  reference:     z.string().max(18).optional(),
+  payeeName:     z.string().min(1).max(140).optional(),
 })
 
-/**
- * Zod schema for an international payment using IBAN.
- */
 export const internationalPaymentSchema = z.object({
-  iban: ibanSchema,
-  amount: z.number().positive('Amount must be greater than zero'),
-  currency: currencySchema,
+  iban:      ibanSchema,
+  bic:       bicSchema.optional(),
+  amount:    z.number().positive('Amount must be greater than zero'),
+  currency:  currencySchema,
   reference: z.string().max(35).optional(),
+  payeeName: z.string().min(1).max(140).optional(),
 })
+
+export type UKPayment             = z.infer<typeof ukPaymentSchema>
+export type InternationalPayment  = z.infer<typeof internationalPaymentSchema>

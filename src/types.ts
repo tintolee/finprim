@@ -1,19 +1,20 @@
-// Branded types enforce domain correctness at the type level.
-// Invalid financial data cannot be passed where valid data is expected.
+
 
 declare const __brand: unique symbol
-
 type Brand<T, B> = T & { readonly [__brand]: B }
 
-export type IBAN = Brand<string, 'IBAN'>
-export type SortCode = Brand<string, 'SortCode'>
+export type IBAN          = Brand<string, 'IBAN'>
+export type SortCode      = Brand<string, 'SortCode'>
 export type AccountNumber = Brand<string, 'AccountNumber'>
-export type CurrencyCode = Brand<string, 'CurrencyCode'>
+export type CurrencyCode  = Brand<string, 'CurrencyCode'>
+export type BIC           = Brand<string, 'BIC'>
+export type CardNumber    = Brand<string, 'CardNumber'>
 
-// Supported ISO 4217 currency codes
-export type SupportedCurrency = 'GBP' | 'EUR' | 'USD' | 'JPY' | 'CHF' | 'CAD' | 'AUD' | 'NZD'
+export type SupportedCurrency =
+  | 'GBP' | 'EUR' | 'USD' | 'JPY'
+  | 'CHF' | 'CAD' | 'AUD' | 'NZD'
 
-// Result types returned by all validators
+
 export type ValidationSuccess<T> = {
   valid: true
   value: T
@@ -27,7 +28,9 @@ export type ValidationFailure = {
 
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure
 
-// Money result from parseMoney
+export type IBANValidationSuccess = ValidationSuccess<IBAN> & { countryCode: string }
+export type IBANValidationResult = IBANValidationSuccess | ValidationFailure
+
 export type MoneyResult =
-  | { valid: true; amount: number; currency: SupportedCurrency; formatted: string }
+  | { valid: true;  amount: number; currency: SupportedCurrency; formatted: string }
   | { valid: false; error: string }

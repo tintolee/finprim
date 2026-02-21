@@ -8,48 +8,38 @@
     "type": "git",
     "url": "https://github.com/tintolee/finprim.git"
   },
-  "homepage": "https://github.com/tintolee/finprim#readme",
   "keywords": [
-    "fintech",
-    "typescript",
-    "iban",
-    "sort-code",
-    "currency",
-    "validation",
-    "formatting",
-    "financial",
-    "primitives",
-    "zod"
+    "fintech", "typescript", "iban", "sort-code",
+    "currency", "validation", "formatting", "financial", "primitives", "zod"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./zod": {
+      "types": "./dist/zod/index.d.ts",
       "import": "./dist/zod/index.mjs",
-      "require": "./dist/zod/index.js",
-      "types": "./dist/zod/index.d.ts"
+      "require": "./dist/zod/index.js"
     },
     "./react": {
+      "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
-      "require": "./dist/react/index.js",
-      "types": "./dist/react/index.d.ts"
+      "require": "./dist/react/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
   },
   "devDependencies": {
     "@testing-library/react": "^14.3.1",
@@ -67,11 +57,7 @@
     "zod": ">=3.0.0"
   },
   "peerDependenciesMeta": {
-    "zod": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    }
+    "zod": { "optional": true },
+    "react": { "optional": true }
   }
 }
