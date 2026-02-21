@@ -31,3 +31,16 @@ export type IBANValidationResult = IBANValidationSuccess | ValidationFailure
 export type MoneyResult =
   | { valid: true; amount: number; currency: SupportedCurrency; formatted: string }
   | { valid: false; error: string }
+
+export type CreditCardNumber = Brand<string, 'CreditCardNumber'>
+
+export type CardIssuer = 'Visa' | 'Mastercard' | 'AmericanExpress' | 'Discover' | 'Unknown'
+
+export type CreditCardValidationSuccess = {
+  valid: true
+  value: CreditCardNumber
+  formatted: string
+  issuer: CardIssuer
+}
+
+export type CreditCardValidationResult = CreditCardValidationSuccess | ValidationFailure

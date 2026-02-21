@@ -9,8 +9,16 @@
     "url": "https://github.com/tintolee/finprim.git"
   },
   "keywords": [
-    "fintech", "typescript", "iban", "sort-code",
-    "currency", "validation", "formatting", "financial", "primitives", "zod"
+    "fintech",
+    "typescript",
+    "iban",
+    "sort-code",
+    "currency",
+    "validation",
+    "formatting",
+    "financial",
+    "primitives",
+    "zod"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -32,7 +40,11 @@
       "require": "./dist/react/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -42,19 +54,26 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "tsup": "^8.0.0",
-    "vitest": "^1.6.0",
-    "zod": "^3.23.0",
+    "@testing-library/react": "^14.3.1",
+    "@types/react": "^18.0.0",
+    "jsdom": "^28.1.0",
     "react": "^18.0.0",
-    "@types/react": "^18.0.0"
+    "react-dom": "^18.3.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "zod": "^3.23.0"
   },
   "peerDependencies": {
-    "zod": ">=3.0.0",
-    "react": ">=17.0.0"
+    "react": ">=17.0.0",
+    "zod": ">=3.0.0"
   },
   "peerDependenciesMeta": {
-    "zod": { "optional": true },
-    "react": { "optional": true }
+    "zod": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   }
 }
