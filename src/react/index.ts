@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react'
 import { validateIBAN } from '../iban'
 import { validateUKSortCode, validateUKAccountNumber } from '../sortcode_and_account_number'
 import { formatCurrency } from '../currency'
-import type { SupportedCurrency, ValidationResult, IBAN, SortCode, AccountNumber } from '../types'
+import { validateCreditCard } from '../creditcard'
+import type { SupportedCurrency, ValidationResult, IBAN, SortCode, AccountNumber, CreditCardValidationResult } from '../types'
 
 /**
  * React hook for IBAN input fields.
@@ -88,6 +89,38 @@ export function useAccountNumberInput() {
     formatted: result?.valid ? result.formatted : value,
     valid: result?.valid ?? null,
     error: result && !result.valid ? result.error : null,
+    onChange,
+  }
+}
+
+/**
+ * React hook for credit card number input fields.
+ * Validates on change after 8 cleaned digits and returns formatted value and issuer.
+ *
+ * @example
+ * const { value, formatted, valid, error, issuer, onChange } = useCreditCardInput()
+ */
+export function useCreditCardInput() {
+  const [value, setValue] = useState('')
+  const [result, setResult] = useState<CreditCardValidationResult | null>(null)
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value
+    setValue(input)
+    const digits = input.replace(/[\s-]/g, '')
+    if (digits.length >= 8) {
+      setResult(validateCreditCard(input))
+    } else {
+      setResult(null)
+    }
+  }, [])
+
+  return {
+    value,
+    formatted: result?.valid ? result.formatted : value,
+    valid: result?.valid ?? null,
+    error: result && !result.valid ? result.error : null,
+    issuer: result?.valid ? result.issuer : null,
     onChange,
   }
 }
