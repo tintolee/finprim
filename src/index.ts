@@ -20,4 +20,6 @@ export type {
   MoneyResult,
 } from './types'
 
+export { isValidationSuccess } from './types'
+
 export type { CardNetwork, CardValidationResult } from './card'

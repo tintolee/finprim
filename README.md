@@ -16,10 +16,11 @@ finprim is the open source version of what your team has already written three t
 
 ## Features
 
-- ✅ IBAN validation and formatting (80+ countries)
-- ✅ UK sort code validation
-- ✅ UK account number validation
-- ✅ Currency formatting with full locale support
+- ✅ IBAN validation and formatting (80+ countries, with country code)
+- ✅ UK sort code and account number validation
+- ✅ BIC/SWIFT validation
+- ✅ Card number validation (Luhn, network detection, formatting)
+- ✅ Currency validation and formatting with locale support
 - ✅ Branded types for compile-time correctness
 - ✅ Zod schemas out of the box
 - ✅ Optional React hooks for form inputs
@@ -48,16 +49,26 @@ npm install finprim zod
 ### Validation
 
 ```ts
-import { validateIBAN, validateUKSortCode, validateUKAccountNumber } from 'finprim'
+import {
+  validateIBAN,
+  validateUKSortCode,
+  validateUKAccountNumber,
+  validateBIC,
+  validateCardNumber,
+  validateCurrencyCode,
+} from 'finprim'
 
 const iban = validateIBAN('GB29NWBK60161331926819')
-// { valid: true, country: 'GB', formatted: 'GB29 NWBK 6016 1331 9268 19' }
+// { valid: true, value: 'GB29NWBK60161331926819', formatted: 'GB29 NWBK 6016 1331 9268 19', countryCode: 'GB' }
 
 const sortCode = validateUKSortCode('60-16-13')
-// { valid: true, formatted: '60-16-13', digits: '601613' }
+// { valid: true, value: '601613', formatted: '60-16-13' }
 
 const account = validateUKAccountNumber('31926819')
-// { valid: true }
+// { valid: true, value: '31926819', formatted: '3192 6819' }
+
+const card = validateCardNumber('4532015112830366')
+// { valid: true, value: '...', formatted: '4532 0151 1283 0366', network: 'Visa', last4: '0366' }
 ```
 
 ### Currency Formatting
@@ -69,7 +80,7 @@ formatCurrency(1000.5, 'GBP', 'en-GB')  // '£1,000.50'
 formatCurrency(1000.5, 'EUR', 'de-DE')  // '1.000,50 €'
 formatCurrency(1000.5, 'USD', 'en-US')  // '$1,000.50'
 
-parseMoney('£1,000.50')  // { amount: 1000.50, currency: 'GBP', valid: true }
+parseMoney('£1,000.50')  // { valid: true, amount: 1000.50, currency: 'GBP', formatted: '£1,000.50' }
 ```
 
 ### Branded Types
@@ -104,18 +115,19 @@ const PaymentSchema = z.object({
 ### React Hooks
 
 ```ts
-import { useCurrencyInput, useIBANInput } from 'finprim/react'
+import { useIBANInput, useCardNumberInput, useCurrencyInput } from 'finprim/react'
 
 function PaymentForm() {
-  const { value, formatted, valid, onChange } = useCurrencyInput('GBP', 'en-GB')
   const iban = useIBANInput()
+  const card = useCardNumberInput()
+  const { rawValue, formatted, onChange } = useCurrencyInput('GBP', 'en-GB')
 
   return (
-    <input
-      value={formatted}
-      onChange={onChange}
-      aria-invalid={!valid}
-    />
+    <>
+      <input value={iban.value} onChange={iban.onChange} aria-invalid={iban.valid === false} />
+      <input value={card.formatted} onChange={card.onChange} aria-invalid={card.valid === false} />
+      <input value={formatted} onChange={onChange} />
+    </>
   )
 }
 ```
@@ -127,20 +139,22 @@ function PaymentForm() {
 ### Validation
 
 | Function | Input | Returns |
-|---|---|---|
-| `validateIBAN(input)` | `string` | `IBANResult` |
-| `validateUKSortCode(input)` | `string` | `SortCodeResult` |
-| `validateUKAccountNumber(input)` | `string` | `AccountResult` |
-| `validateCurrencyCode(input)` | `string` | `CurrencyResult` |
+|----------|-------|---------|
+| `validateIBAN(input)` | `string` | `IBANValidationResult` (includes `countryCode` when valid) |
+| `validateUKSortCode(input)` | `string` | `ValidationResult<SortCode>` |
+| `validateUKAccountNumber(input)` | `string` | `ValidationResult<AccountNumber>` |
+| `validateCurrencyCode(input)` | `string` | `ValidationResult<CurrencyCode>` |
+| `validateBIC(input)` | `string` | `ValidationResult<BIC>` |
+| `validateCardNumber(input)` | `string` | `CardValidationResult` (includes `network`, `last4` when valid) |
 
 ### Formatting
 
 | Function | Input | Returns |
-|---|---|---|
-| `formatCurrency(amount, currency, locale)` | `number, string, string` | `string` |
-| `formatIBAN(input)` | `string` | `string` |
-| `formatSortCode(input)` | `string` | `string` |
+|----------|-------|---------|
+| `formatCurrency(amount, currency, locale?)` | `number`, `SupportedCurrency`, `string?` | `string` |
 | `parseMoney(input)` | `string` | `MoneyResult` |
+
+Validation results include a `formatted` string when valid (e.g. IBAN and card numbers are space-separated).
 
 ---
 
@@ -166,9 +180,9 @@ function PaymentForm() {
 
 ## Roadmap
 
-- [ ] SWIFT / BIC validation
+- [x] SWIFT / BIC validation
+- [x] Luhn algorithm for card number validation
 - [ ] EU VAT number validation
-- [ ] Luhn algorithm for card number validation
 - [ ] NestJS pipe integration
 - [ ] More locale coverage
 

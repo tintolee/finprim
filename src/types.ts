@@ -25,22 +25,15 @@ export type ValidationFailure = {
 
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure
 
+export function isValidationSuccess<T>(
+  result: ValidationResult<T>
+): result is ValidationSuccess<T> {
+  return result.valid === true
+}
+
 export type IBANValidationSuccess = ValidationSuccess<IBAN> & { countryCode: string }
 export type IBANValidationResult = IBANValidationSuccess | ValidationFailure
 
 export type MoneyResult =
   | { valid: true; amount: number; currency: SupportedCurrency; formatted: string }
   | { valid: false; error: string }
-
-export type CreditCardNumber = Brand<string, 'CreditCardNumber'>
-
-export type CardIssuer = 'Visa' | 'Mastercard' | 'AmericanExpress' | 'Discover' | 'Unknown'
-
-export type CreditCardValidationSuccess = {
-  valid: true
-  value: CreditCardNumber
-  formatted: string
-  issuer: CardIssuer
-}
-
-export type CreditCardValidationResult = CreditCardValidationSuccess | ValidationFailure

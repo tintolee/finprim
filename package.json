@@ -51,7 +51,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "devDependencies": {
     "@testing-library/react": "^14.3.1",

@@ -3,6 +3,8 @@ import { validateIBAN } from '../iban'
 import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
 import { formatCurrency } from '../currency'
 import { validateBIC } from '../bic'
+import { validateCardNumber } from '../card'
+import type { CardValidationResult } from '../card'
 import type {
   SupportedCurrency,
   ValidationResult,
@@ -10,23 +12,24 @@ import type {
   SortCode,
   AccountNumber,
   BIC,
+  CardNumber,
 } from '../types'
 
-type HookResult<T> = {
+type HookResult<T, R = ValidationResult<T>> = {
   value: string
   formatted: string
   valid: boolean | null
   error: string | null
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  result: ValidationResult<T> | null
+  result: R | null
 }
 
-function useValidatedInput<T>(
-  validator: (val: string) => ValidationResult<T>,
+function useValidatedInput<T, R extends ValidationResult<T> = ValidationResult<T>>(
+  validator: (val: string) => R,
   minLength = 1
-): HookResult<T> {
+): HookResult<T, R> {
   const [value, setValue] = useState('')
-  const [result, setResult] = useState<ValidationResult<T> | null>(null)
+  const [result, setResult] = useState<R | null>(null)
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,11 +44,13 @@ function useValidatedInput<T>(
     [validator, minLength]
   )
 
+  const error = result?.valid === false ? result.error : null
+
   return {
     value,
     formatted: result?.valid ? result.formatted : value,
     valid: result === null ? null : result.valid,
-    error: result && !result.valid ? result.error : null,
+    error,
     onChange,
     result,
   }
@@ -67,12 +72,17 @@ export function useBICInput(): HookResult<BIC> {
   return useValidatedInput(validateBIC, 8)
 }
 
+export function useCardNumberInput(): HookResult<CardNumber, CardValidationResult> {
+  return useValidatedInput(validateCardNumber, 8)
+}
+
 export function useCurrencyInput(currency: SupportedCurrency, locale?: string) {
   const [rawValue, setRawValue] = useState<number | null>(null)
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const num = Number.parseFloat(e.target.value.replace(/[^0-9.]/g, ''))
+      const digits = e.target.value.replace(/[^0-9.]/g, '')
+      const num = Number.parseFloat(digits)
       setRawValue(Number.isNaN(num) ? null : num)
     },
     []

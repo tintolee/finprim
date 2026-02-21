@@ -5,39 +5,38 @@ import { validateCurrencyCode } from '../currency'
 import { validateBIC } from '../bic'
 import { validateCardNumber } from '../card'
 
-function refineWith<T>(validator: (val: string) => { valid: boolean; error?: string }) {
+type StringValidator = (val: string) => { valid: boolean; error?: string }
+
+function refineWith(validator: StringValidator) {
   return {
     validate: (val: string) => validator(val).valid,
     message: (val: string) => {
       const result = validator(val)
-      return { message: result.valid ? '' : (result as { error: string }).error }
+      return { message: result.valid ? '' : (result.error ?? 'Invalid') }
     },
   }
 }
 
-export const ibanSchema = z
-  .string()
-  .refine(refineWith(validateIBAN).validate, refineWith(validateIBAN).message)
+const ibanRefiner = refineWith(validateIBAN)
+const sortCodeRefiner = refineWith(validateUKSortCode)
+const accountNumberRefiner = refineWith(validateUKAccountNumber)
+const currencyRefiner = refineWith(validateCurrencyCode)
+const bicRefiner = refineWith(validateBIC)
+const cardNumberRefiner = refineWith(validateCardNumber)
 
-export const sortCodeSchema = z
-  .string()
-  .refine(refineWith(validateUKSortCode).validate, refineWith(validateUKSortCode).message)
+export const ibanSchema = z.string().refine(ibanRefiner.validate, ibanRefiner.message)
+
+export const sortCodeSchema = z.string().refine(sortCodeRefiner.validate, sortCodeRefiner.message)
 
 export const accountNumberSchema = z
   .string()
-  .refine(refineWith(validateUKAccountNumber).validate, refineWith(validateUKAccountNumber).message)
+  .refine(accountNumberRefiner.validate, accountNumberRefiner.message)
 
-export const currencySchema = z
-  .string()
-  .refine(refineWith(validateCurrencyCode).validate, refineWith(validateCurrencyCode).message)
+export const currencySchema = z.string().refine(currencyRefiner.validate, currencyRefiner.message)
 
-export const bicSchema = z
-  .string()
-  .refine(refineWith(validateBIC).validate, refineWith(validateBIC).message)
+export const bicSchema = z.string().refine(bicRefiner.validate, bicRefiner.message)
 
-export const cardNumberSchema = z
-  .string()
-  .refine(refineWith(validateCardNumber).validate, refineWith(validateCardNumber).message)
+export const cardNumberSchema = z.string().refine(cardNumberRefiner.validate, cardNumberRefiner.message)
 
 export const ukPaymentSchema = z.object({
   sortCode: sortCodeSchema,
