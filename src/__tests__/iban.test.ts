@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { validateIBAN } from '../iban'
 
 describe('validateIBAN', () => {
-
   it('passes a valid UK IBAN', () => {
     const result = validateIBAN('GB29NWBK60161331926819')
     expect(result.valid).toBe(true)
@@ -34,7 +33,6 @@ describe('validateIBAN', () => {
     expect(result.valid).toBe(true)
   })
 
-  // Invalid IBANs
   it('fails an invalid checksum', () => {
     const result = validateIBAN('GB00NWBK60161331926819')
     expect(result.valid).toBe(false)

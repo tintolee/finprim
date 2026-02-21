@@ -1,7 +1,5 @@
 import type { SortCode, AccountNumber, ValidationResult } from './types'
 
-
- 
 export function validateUKSortCode(input: string): ValidationResult<SortCode> {
   if (!input || typeof input !== 'string') {
     return { valid: false, error: 'Input must be a non-empty string' }
@@ -24,7 +22,6 @@ export function validateUKSortCode(input: string): ValidationResult<SortCode> {
     formatted,
   }
 }
-
 
 export function validateUKAccountNumber(input: string): ValidationResult<AccountNumber> {
   if (!input || typeof input !== 'string') {

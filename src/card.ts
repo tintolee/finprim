@@ -6,15 +6,13 @@ export type CardValidationResult =
   | { valid: true; value: CardNumber; formatted: string; network: CardNetwork; last4: string }
   | { valid: false; error: string }
 
-
 function detectNetwork(digits: string): CardNetwork {
-  if (/^4/.test(digits))                                return 'Visa'
+  if (/^4/.test(digits)) return 'Visa'
   if (/^5[1-5]/.test(digits) || /^2[2-7]/.test(digits)) return 'Mastercard'
-  if (/^3[47]/.test(digits))                            return 'Amex'
-  if (/^6(?:011|5)/.test(digits))                       return 'Discover'
+  if (/^3[47]/.test(digits)) return 'Amex'
+  if (/^6(?:011|5)/.test(digits)) return 'Discover'
   return 'Unknown'
 }
-
 
 function formatCardNumber(digits: string, network: CardNetwork): string {
   if (network === 'Amex') {
@@ -22,7 +20,6 @@ function formatCardNumber(digits: string, network: CardNetwork): string {
   }
   return digits.replace(/(.{4})/g, '$1 ').trim()
 }
-
 
 export function validateCardNumber(input: string): CardValidationResult {
   if (!input || typeof input !== 'string') {
@@ -42,18 +39,15 @@ export function validateCardNumber(input: string): CardValidationResult {
     }
   }
 
- 
   let sum = 0
   let shouldDouble = false
 
   for (let i = digits.length - 1; i >= 0; i--) {
-    let digit = parseInt(digits[i]!, 10)
-
+    let digit = Number.parseInt(digits[i]!, 10)
     if (shouldDouble) {
       digit *= 2
       if (digit > 9) digit -= 9
     }
-
     sum += digit
     shouldDouble = !shouldDouble
   }

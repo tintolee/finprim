@@ -1,6 +1,5 @@
 import type { IBAN, IBANValidationResult } from './types'
 
-
 const IBAN_LENGTHS: Record<string, number> = {
   AL: 28, AD: 24, AT: 20, AZ: 28, BH: 22, BE: 16, BA: 20, BR: 29,
   BG: 22, CR: 22, HR: 21, CY: 28, CZ: 24, DK: 18, DO: 28, EE: 20,
@@ -12,23 +11,25 @@ const IBAN_LENGTHS: Record<string, number> = {
   ES: 24, SE: 24, CH: 21, TN: 24, TR: 26, AE: 23, GB: 22, VG: 24,
 }
 
-function mod97(value: string): number {
-  let remainder = 0
-  for (const char of value) {
-    remainder = (remainder * 10 + parseInt(char, 10)) % 97
-  }
-  return remainder
-}
+const LETTER_A = 'A'.codePointAt(0)!
+const LETTER_Z = 'Z'.codePointAt(0)!
+const LETTER_TO_DIGIT_OFFSET = 55
 
+function mod97(value: string): number {
+  return [...value].reduce(
+    (remainder, char) => (remainder * 10 + Number.parseInt(char, 10)) % 97,
+    0
+  )
+}
 
 function ibanToDigits(iban: string): string {
   const rearranged = iban.slice(4) + iban.slice(0, 4)
-  return rearranged
-    .split('')
+  return [...rearranged]
     .map((char) => {
-      const code = char.charCodeAt(0)
- 
-      return code >= 65 && code <= 90 ? (code - 55).toString() : char
+      const code = char.codePointAt(0) ?? 0
+      return code >= LETTER_A && code <= LETTER_Z
+        ? (code - LETTER_TO_DIGIT_OFFSET).toString()
+        : char
     })
     .join('')
 }
@@ -37,8 +38,7 @@ function formatIBANString(iban: string): string {
   return iban.replace(/(.{4})/g, '$1 ').trim()
 }
 
-
-export function validateIBAN(input: string): ValidationResult<IBAN> {
+export function validateIBAN(input: string): IBANValidationResult {
   if (!input || typeof input !== 'string') {
     return { valid: false, error: 'Input must be a non-empty string' }
   }

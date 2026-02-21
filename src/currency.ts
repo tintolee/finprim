@@ -16,13 +16,12 @@ const CURRENCY_LOCALES: Record<SupportedCurrency, string> = {
 }
 
 const SYMBOL_MAP: Record<string, SupportedCurrency> = {
-  '£':   'GBP',
-  '€':   'EUR',
-  '$':   'USD',
-  '¥':   'JPY',
+  '£': 'GBP',
+  '€': 'EUR',
+  '$': 'USD',
+  '¥': 'JPY',
   'CHF': 'CHF',
 }
-
 
 export function validateCurrencyCode(input: string): ValidationResult<CurrencyCode> {
   if (!input || typeof input !== 'string') {
@@ -45,15 +44,12 @@ export function validateCurrencyCode(input: string): ValidationResult<CurrencyCo
   }
 }
 
-
-
 export function formatCurrency(
   amount: number,
   currency: SupportedCurrency,
   locale?: string
 ): string {
   const resolvedLocale = locale ?? CURRENCY_LOCALES[currency] ?? 'en-GB'
-
   return new Intl.NumberFormat(resolvedLocale, {
     style: 'currency',
     currency,
@@ -61,7 +57,6 @@ export function formatCurrency(
     maximumFractionDigits: currency === 'JPY' ? 0 : 2,
   }).format(amount)
 }
-
 
 export function parseMoney(input: string): MoneyResult {
   if (!input || typeof input !== 'string') {
@@ -83,11 +78,10 @@ export function parseMoney(input: string): MoneyResult {
     return { valid: false, error: 'Could not detect currency from input. Expected a symbol like £, €, $, ¥' }
   }
 
-
   const normalised = cleaned.replace(/,/g, '')
-  const amount = parseFloat(normalised)
+  const amount = Number.parseFloat(normalised)
 
-  if (isNaN(amount)) {
+  if (Number.isNaN(amount)) {
     return { valid: false, error: `Could not parse amount from: "${cleaned}"` }
   }
 
