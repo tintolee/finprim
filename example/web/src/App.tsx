@@ -1,19 +1,21 @@
 import { useState } from 'react';
 
-import { InterestDemo } from './components/InterestDemo';
+// import { InterestDemo } from './components/InterestDemo';
 import type { FinprimExample } from './types';
 import { IbanValidator } from './components/IbanValidator';
 import { UkBankValidator } from './components/UkBankValidator';
 import { ExampleCard } from './components/ExampleCard';
+import { CurrencyShowcase } from './components/CurrencyShowcase';
+import { ZodFormDemo } from './ZodFormDemo';
 
 // THE REGISTRY: Just add new team components here!
 const EXAMPLES: FinprimExample[] = [
-  {
-    id: 'interest',
-    title: 'Compound Interest',
-    description: 'Calculates compound interest over time.',
-    component: InterestDemo,
-  },
+  // {
+  //   id: 'interest',
+  //   title: 'Compound Interest',
+  //   description: 'Calculates compound interest over time.',
+  //   component: InterestDemo,
+  // },
   {
     id: 'iban',
     title: 'IBAN Validator',
@@ -25,7 +27,19 @@ const EXAMPLES: FinprimExample[] = [
     title: 'UK Bank Details',
     description: 'Validate UK Sort Codes and Account Numbers.',
     component: UkBankValidator,
-  }
+  },
+  {
+    id: 'currency',
+    title: 'Currency Engine',
+    description: 'International formatting and intelligent string parsing.',
+    component: CurrencyShowcase,
+  },
+  {
+    id: 'zod',
+    title: 'Zod Integration',
+    description: 'Use finprim schemas to build type-safe, validated forms effortlessly.',
+    component: ZodFormDemo,
+  },
   // { id: 'tax', title: 'Tax Bracket', description: '...', component: TaxDemo },
 ];
 

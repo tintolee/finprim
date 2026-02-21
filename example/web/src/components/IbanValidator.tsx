@@ -10,7 +10,7 @@ export const IbanValidator = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className='finprim-input-group'>
         <label className="finprim-label">Enter IBAN</label>
         <input 
           className="finprim-input" 

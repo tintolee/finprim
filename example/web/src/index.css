@@ -1,19 +1,33 @@
 @import "tailwindcss";
 
+
+@theme {
+  /* Define the color family */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+}
+
+
 @layer components {
-  .finprim-input {
-    @apply w-full rounded-lg border border-gray-300 p-2.5 
-           focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500
-           transition-all duration-200 placeholder:text-gray-400;
+  .finprim-input-group {
+    @apply flex flex-col gap-2 w-full mb-6;
   }
 
   .finprim-label {
-    @apply mb-2 block text-sm font-semibold text-gray-700;
+    @apply text-sm font-semibold text-gray-700;
   }
 
-  .finprim-btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-primary-600 
-           px-5 py-3 text-sm font-bold text-white shadow-sm 
-           hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  .finprim-input {
+    @apply w-full rounded-lg border border-gray-300 p-3 
+           focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500
+           transition-all duration-200 placeholder:text-gray-400 shadow-sm;
   }
 }
