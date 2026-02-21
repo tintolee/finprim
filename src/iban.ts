@@ -1,6 +1,5 @@
-import type { IBAN, ValidationResult } from './types'
+import type { IBAN, IBANValidationResult } from './types'
 
-// IBAN lengths per country code (ISO 13616)
 const IBAN_LENGTHS: Record<string, number> = {
   AL: 28, AD: 24, AT: 20, AZ: 28, BH: 22, BE: 16, BA: 20, BR: 29,
   BG: 22, CR: 22, HR: 21, CY: 28, CZ: 24, DK: 18, DO: 28, EE: 20,
@@ -12,21 +11,25 @@ const IBAN_LENGTHS: Record<string, number> = {
   ES: 24, SE: 24, CH: 21, TN: 24, TR: 26, AE: 23, GB: 22, VG: 24,
 }
 
+const LETTER_A = 'A'.codePointAt(0)!
+const LETTER_Z = 'Z'.codePointAt(0)!
+const LETTER_TO_DIGIT_OFFSET = 55
+
 function mod97(value: string): number {
-  let remainder = 0
-  for (const char of value) {
-    remainder = (remainder * 10 + parseInt(char, 10)) % 97
-  }
-  return remainder
+  return [...value].reduce(
+    (remainder, char) => (remainder * 10 + Number.parseInt(char, 10)) % 97,
+    0
+  )
 }
 
 function ibanToDigits(iban: string): string {
   const rearranged = iban.slice(4) + iban.slice(0, 4)
-  return rearranged
-    .split('')
+  return [...rearranged]
     .map((char) => {
-      const code = char.charCodeAt(0)
-      return code >= 65 && code <= 90 ? (code - 55).toString() : char
+      const code = char.codePointAt(0) ?? 0
+      return code >= LETTER_A && code <= LETTER_Z
+        ? (code - LETTER_TO_DIGIT_OFFSET).toString()
+        : char
     })
     .join('')
 }
@@ -35,15 +38,11 @@ function formatIBANString(iban: string): string {
   return iban.replace(/(.{4})/g, '$1 ').trim()
 }
 
-/**
- * Validates an IBAN string.
- * Accepts IBANs with or without spaces.
- *
- * @example
- * validateIBAN('GB29NWBK60161331926819')
- * // { valid: true, value: 'GB29NWBK60161331926819', formatted: 'GB29 NWBK 6016 1331 9268 19' }
- */
-export function validateIBAN(input: string): ValidationResult<IBAN> {
+export function validateIBAN(input: string): IBANValidationResult {
+  if (!input || typeof input !== 'string') {
+    return { valid: false, error: 'Input must be a non-empty string' }
+  }
+
   const cleaned = input.replace(/\s/g, '').toUpperCase()
 
   if (cleaned.length < 4) {
@@ -51,6 +50,11 @@ export function validateIBAN(input: string): ValidationResult<IBAN> {
   }
 
   const countryCode = cleaned.slice(0, 2)
+
+  if (!/^[A-Z]{2}$/.test(countryCode)) {
+    return { valid: false, error: 'IBAN must start with a 2-letter country code' }
+  }
+
   const expectedLength = IBAN_LENGTHS[countryCode]
 
   if (!expectedLength) {
@@ -60,7 +64,7 @@ export function validateIBAN(input: string): ValidationResult<IBAN> {
   if (cleaned.length !== expectedLength) {
     return {
       valid: false,
-      error: `Invalid length for ${countryCode} IBAN. Expected ${expectedLength}, got ${cleaned.length}`,
+      error: `Invalid length for ${countryCode} IBAN. Expected ${expectedLength} characters, got ${cleaned.length}`,
     }
   }
 
@@ -69,6 +73,7 @@ export function validateIBAN(input: string): ValidationResult<IBAN> {
   }
 
   const digits = ibanToDigits(cleaned)
+
   if (mod97(digits) !== 1) {
     return { valid: false, error: 'IBAN checksum is invalid' }
   }
@@ -77,5 +82,6 @@ export function validateIBAN(input: string): ValidationResult<IBAN> {
     valid: true,
     value: cleaned as IBAN,
     formatted: formatIBANString(cleaned),
+    countryCode,
   }
 }
