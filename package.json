@@ -1,6 +1,6 @@
 {
   "name": "finprim",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Financial primitives for modern TypeScript applications",
   "author": "Oluwatosin Adelaja , Silke Nodwell,Mohammead Hassani Sadiq, Nick Goddard ",
   "license": "MIT",
