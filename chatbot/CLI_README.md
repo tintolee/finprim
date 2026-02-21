@@ -22,6 +22,7 @@ npm install
 3. **Run the chatbot:**
 From the example folder, run
 ```bash
+cd chatbot
 npm run cli
 ```
 

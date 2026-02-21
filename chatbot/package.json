@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "dotenv": "^17.3.1",
-    "openai": "^4.0.0"
+    "openai": "^4.0.0",
+    "finprim": "file:.."
   },
   "devDependencies": {
     "@types/node": "^20.19.33",
-    "finprim": "file:../..",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0"
   }
