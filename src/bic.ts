@@ -1,8 +1,6 @@
 import type { BIC, ValidationResult } from './types'
 
-
 const BIC_REGEX = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/
-
 
 export function validateBIC(input: string): ValidationResult<BIC> {
   if (!input || typeof input !== 'string') {
@@ -25,10 +23,10 @@ export function validateBIC(input: string): ValidationResult<BIC> {
     }
   }
 
-  const bankCode    = cleaned.slice(0, 4)
+  const bankCode = cleaned.slice(0, 4)
   const countryCode = cleaned.slice(4, 6)
-  const location    = cleaned.slice(6, 8)
-  const branch      = cleaned.length === 11 ? cleaned.slice(8, 11) : 'XXX'
+  const location = cleaned.slice(6, 8)
+  const branch = cleaned.length === 11 ? cleaned.slice(8, 11) : 'XXX'
 
   return {
     valid: true,

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { validateIBAN } from '../iban'
-import { validateUKSortCode, validateUKAccountNumber } from '../sortcode_and_account_number'
+import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
 import { formatCurrency } from '../currency'
 import { validateBIC } from '../bic'
 import type {
@@ -51,34 +51,29 @@ function useValidatedInput<T>(
   }
 }
 
-
 export function useIBANInput(): HookResult<IBAN> {
   return useValidatedInput(validateIBAN, 5)
 }
-
 
 export function useSortCodeInput(): HookResult<SortCode> {
   return useValidatedInput(validateUKSortCode, 6)
 }
 
-
 export function useAccountNumberInput(): HookResult<AccountNumber> {
   return useValidatedInput(validateUKAccountNumber, 8)
 }
 
-
 export function useBICInput(): HookResult<BIC> {
   return useValidatedInput(validateBIC, 8)
 }
-
 
 export function useCurrencyInput(currency: SupportedCurrency, locale?: string) {
   const [rawValue, setRawValue] = useState<number | null>(null)
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const num = parseFloat(e.target.value.replace(/[^0-9.]/g, ''))
-      setRawValue(isNaN(num) ? null : num)
+      const num = Number.parseFloat(e.target.value.replace(/[^0-9.]/g, ''))
+      setRawValue(Number.isNaN(num) ? null : num)
     },
     []
   )

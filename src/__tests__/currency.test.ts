@@ -80,9 +80,7 @@ describe('parseMoney', () => {
   it('parses a EUR string', () => {
     const result = parseMoney('€250.75')
     expect(result.valid).toBe(true)
-    if (result.valid) {
-      expect(result.currency).toBe('EUR')
-    }
+    if (result.valid) expect(result.currency).toBe('EUR')
   })
 
   it('fails when no currency symbol is detected', () => {

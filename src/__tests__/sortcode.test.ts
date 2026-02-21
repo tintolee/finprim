@@ -19,9 +19,7 @@ describe('validateUKSortCode', () => {
   it('passes a spaced sort code', () => {
     const result = validateUKSortCode('60 16 13')
     expect(result.valid).toBe(true)
-    if (result.valid) {
-      expect(result.formatted).toBe('60-16-13')
-    }
+    if (result.valid) expect(result.formatted).toBe('60-16-13')
   })
 
   it('fails a sort code with too few digits', () => {
