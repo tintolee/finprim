@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {validateIBAN} from '../../../../src/iban'
 
+
 export const IbanValidator = () => {
   const [input, setInput] = useState('');
   
@@ -8,21 +9,14 @@ export const IbanValidator = () => {
   const result = input ? validateIBAN(input) : null;
 
   return (
-    <div className="flex max-w-md flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-gray-700">Enter IBAN</label>
+    <div className="space-y-6">
+      <div>
+        <label className="finprim-label">Enter IBAN</label>
         <input 
-          type="text" 
+          className="finprim-input" 
           value={input} 
           onChange={(e) => setInput(e.target.value)} 
           placeholder="GB29 NWBK..."
-          className={`rounded-lg border p-2.5 focus:outline-none focus:ring-1 ${
-            result?.valid 
-              ? 'border-green-500 focus:ring-green-500' 
-              : result && !result.valid 
-                ? 'border-red-500 focus:ring-red-500' 
-                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
-          }`}
         />
       </div>
 

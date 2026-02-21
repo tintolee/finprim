@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@layer components {
+  .finprim-input {
+    @apply w-full rounded-lg border border-gray-300 p-2.5 
+           focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500
+           transition-all duration-200 placeholder:text-gray-400;
+  }
+
+  .finprim-label {
+    @apply mb-2 block text-sm font-semibold text-gray-700;
+  }
+
+  .finprim-btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-primary-600 
+           px-5 py-3 text-sm font-bold text-white shadow-sm 
+           hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+}

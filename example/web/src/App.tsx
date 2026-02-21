@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { InterestDemo } from './components/InterestDemo';
 import type { FinprimExample } from './types';
 import { IbanValidator } from './components/IbanValidator';
+import { UkBankValidator } from './components/UkBankValidator';
+import { ExampleCard } from './components/ExampleCard';
 
 // THE REGISTRY: Just add new team components here!
 const EXAMPLES: FinprimExample[] = [
@@ -18,6 +20,12 @@ const EXAMPLES: FinprimExample[] = [
     description: 'Real-time validation and formatting for international bank account numbers.',
     component: IbanValidator,
   },
+  {
+    id: 'uk-bank',
+    title: 'UK Bank Details',
+    description: 'Validate UK Sort Codes and Account Numbers.',
+    component: UkBankValidator,
+  }
   // { id: 'tax', title: 'Tax Bracket', description: '...', component: TaxDemo },
 ];
 
@@ -35,9 +43,8 @@ export default function App() {
             <button
               key={ex.id}
               onClick={() => setActiveId(ex.id)}
-              className={`rounded-lg px-4 py-2 text-left font-medium transition-colors ${
-                activeId === ex.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`rounded-lg px-4 py-2 text-left font-medium transition-colors ${activeId === ex.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'
+                }`}
             >
               {ex.title}
             </button>
@@ -47,15 +54,14 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 p-10">
-        <header className="mb-8">
+        <header className="mb-8 max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold">{activeExample?.title}</h2>
           <p className="mt-2 text-gray-500">{activeExample?.description}</p>
         </header>
-        
-        {/* Render the active component dynamically */}
-        <section className="rounded-2xl border border-gray-200 bg-gray-100 p-8 shadow-inner">
-          {activeExample ? <activeExample.component /> : <p>Component not found.</p>}
-        </section>
+
+        <ExampleCard>
+          {activeExample ? <activeExample.component /> : <p>Select an example</p>}
+        </ExampleCard>
       </main>
     </div>
   );
