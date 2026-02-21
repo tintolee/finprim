@@ -1,9 +1,35 @@
+import { useState, useCallback } from 'react'
 import { useSortCodeInput, useAccountNumberInput } from 'finprim/react'
 import { FieldGroup } from './FieldGroup.tsx'
 
+function fakeEvent(value: string): React.ChangeEvent<HTMLInputElement> {
+  return { target: { value } } as React.ChangeEvent<HTMLInputElement>
+}
+
 export function UKPaymentSection() {
-  const sortCode = useSortCodeInput()
-  const accountNumber = useAccountNumberInput()
+  const { valid: sortValid, error: sortError, formatted: sortFormatted, onChange: sortHookChange } = useSortCodeInput()
+  const { valid: acctValid, error: acctError, formatted: acctFormatted, onChange: acctHookChange } = useAccountNumberInput()
+
+  const [sortDisplay, setSortDisplay] = useState('')
+  const [acctDisplay, setAcctDisplay] = useState('')
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 6)
+    let display = digits
+    if (digits.length > 4) display = `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`
+    else if (digits.length > 2) display = `${digits.slice(0, 2)}-${digits.slice(2)}`
+    setSortDisplay(display)
+    // Hook validates at raw length === 6, so pass only the digits
+    sortHookChange(fakeEvent(digits))
+  }, [sortHookChange])
+
+  const handleAcctChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 8)
+    const display = digits.length > 4 ? `${digits.slice(0, 4)} ${digits.slice(4)}` : digits
+    setAcctDisplay(display)
+    // Validator strips spaces, so passing the display value is fine
+    acctHookChange(fakeEvent(display))
+  }, [acctHookChange])
 
   return (
     <article className="section-card">
@@ -25,38 +51,40 @@ export function UKPaymentSection() {
           <FieldGroup
             label="Sort Code"
             hint="e.g. 60-16-13"
-            valid={sortCode.valid}
-            error={sortCode.error}
-            formatted={sortCode.formatted || undefined}
+            valid={sortValid}
+            error={sortError}
+            formatted={sortFormatted || undefined}
           >
             <input
               className="field-group__input"
               type="text"
-              value={sortCode.value}
-              onChange={sortCode.onChange}
+              value={sortDisplay}
+              onChange={handleSortChange}
               placeholder="60-16-13"
               autoComplete="off"
               spellCheck={false}
               maxLength={8}
+              inputMode="numeric"
               aria-label="Sort code"
             />
           </FieldGroup>
           <FieldGroup
             label="Account Number"
-            hint="e.g. 31926819"
-            valid={accountNumber.valid}
-            error={accountNumber.error}
-            formatted={accountNumber.formatted || undefined}
+            hint="e.g. 3192 6819"
+            valid={acctValid}
+            error={acctError}
+            formatted={acctFormatted || undefined}
           >
             <input
               className="field-group__input"
               type="text"
-              value={accountNumber.value}
-              onChange={accountNumber.onChange}
-              placeholder="31926819"
+              value={acctDisplay}
+              onChange={handleAcctChange}
+              placeholder="0000 0000"
               autoComplete="off"
               spellCheck={false}
-              maxLength={8}
+              maxLength={9}
+              inputMode="numeric"
               aria-label="Account number"
             />
           </FieldGroup>

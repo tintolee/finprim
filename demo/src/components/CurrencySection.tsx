@@ -5,17 +5,6 @@ import { FieldGroup } from './FieldGroup.tsx'
 
 const CURRENCIES: SupportedCurrency[] = ['GBP', 'EUR', 'USD', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD']
 
-const CURRENCY_LABELS: Record<SupportedCurrency, string> = {
-  GBP: 'GBP — British Pound',
-  EUR: 'EUR — Euro',
-  USD: 'USD — US Dollar',
-  JPY: 'JPY — Japanese Yen',
-  CHF: 'CHF — Swiss Franc',
-  CAD: 'CAD — Canadian Dollar',
-  AUD: 'AUD — Australian Dollar',
-  NZD: 'NZD — New Zealand Dollar',
-}
-
 export function CurrencySection() {
   const [currency, setCurrency] = useState<SupportedCurrency>('GBP')
   const [inputVal, setInputVal] = useState('')
@@ -57,7 +46,7 @@ export function CurrencySection() {
               aria-label="Currency"
             >
               {CURRENCIES.map((c) => (
-                <option key={c} value={c}>{CURRENCY_LABELS[c]}</option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </FieldGroup>

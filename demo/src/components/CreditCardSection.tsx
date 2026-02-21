@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react'
 import { useCreditCardInput } from 'finprim/react'
 import type { CardIssuer } from 'finprim'
 import { FieldGroup } from './FieldGroup.tsx'
@@ -19,8 +20,21 @@ function issuerBadgeClass(issuer: CardIssuer): string {
   }
 }
 
+function fakeEvent(value: string): React.ChangeEvent<HTMLInputElement> {
+  return { target: { value } } as React.ChangeEvent<HTMLInputElement>
+}
+
 export function CreditCardSection() {
-  const { value, formatted, valid, error, issuer, onChange } = useCreditCardInput()
+  const { valid, error, formatted, issuer, onChange: hookChange } = useCreditCardInput()
+  const [display, setDisplay] = useState('')
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 16)
+    const formatted = digits.match(/.{1,4}/g)?.join(' ') ?? digits
+    setDisplay(formatted)
+    // Hook strips spaces before validating, so passing the formatted value is fine
+    hookChange(fakeEvent(formatted))
+  }, [hookChange])
 
   const badge = issuer ? (
     <span className={issuerBadgeClass(issuer)}>{issuerLabel(issuer)}</span>
@@ -54,9 +68,9 @@ export function CreditCardSection() {
           <input
             className="field-group__input"
             type="text"
-            value={value}
-            onChange={onChange}
-            placeholder="4111 1111 1111 1111"
+            value={display}
+            onChange={handleChange}
+            placeholder="0000 0000 0000 0000"
             autoComplete="cc-number"
             spellCheck={false}
             maxLength={19}

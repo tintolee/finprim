@@ -1,8 +1,18 @@
+import { useState, useCallback } from 'react'
 import { useIBANInput } from 'finprim/react'
 import { FieldGroup } from './FieldGroup.tsx'
 
 export function IBANSection() {
-  const { value, formatted, valid, error, onChange } = useIBANInput()
+  const { formatted, valid, error, onChange: hookChange } = useIBANInput()
+  const [display, setDisplay] = useState('')
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    // Strip spaces, uppercase, cap at 34 chars (max IBAN length), re-space every 4
+    const raw = e.target.value.replace(/\s/g, '').toUpperCase().slice(0, 34)
+    const spaced = raw.match(/.{1,4}/g)?.join(' ') ?? raw
+    setDisplay(spaced)
+    hookChange({ ...e, target: { ...e.target, value: spaced } })
+  }, [hookChange])
 
   return (
     <article className="section-card">
@@ -29,12 +39,12 @@ export function IBANSection() {
           <input
             className="field-group__input"
             type="text"
-            value={value}
-            onChange={onChange}
+            value={display}
+            onChange={handleChange}
             placeholder="GB29 NWBK 6016 1331 9268 19"
             autoComplete="off"
             spellCheck={false}
-            maxLength={34}
+            maxLength={42}
             aria-label="IBAN"
           />
         </FieldGroup>
