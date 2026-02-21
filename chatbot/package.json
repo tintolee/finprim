@@ -1,0 +1,19 @@
+{
+  "name": "finprim-chatbot",
+  "version": "1.0.0",
+  "description": "CLI chatbot for validating financial information using OpenAI",
+  "type": "module",
+  "scripts": {
+    "cli": "tsx cli.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.33",
+    "finprim": "file:../..",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
