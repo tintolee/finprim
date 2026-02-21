@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { validateIBAN } from '../iban'
-import { validateUKSortCode, validateUKAccountNumber } from '../sortcode_and_account_number'
+import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
 import { validateCurrencyCode } from '../currency'
 import { validateBIC } from '../bic'
 import { validateCardNumber } from '../card'
