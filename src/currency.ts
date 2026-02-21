@@ -1,6 +1,6 @@
 import type { CurrencyCode, SupportedCurrency, MoneyResult, ValidationResult } from './types'
 
-const SUPPORTED_CURRENCIES: SupportedCurrency[] = [
+export const SUPPORTED_CURRENCIES: SupportedCurrency[] = [
   'GBP', 'EUR', 'USD', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD',
 ]
 
@@ -15,14 +15,20 @@ const CURRENCY_LOCALES: Record<SupportedCurrency, string> = {
   NZD: 'en-NZ',
 }
 
-/**
- * Validates a currency code against supported ISO 4217 codes.
- *
- * @example
- * validateCurrencyCode('GBP')
- * // { valid: true, value: 'GBP', formatted: 'GBP' }
- */
+const SYMBOL_MAP: Record<string, SupportedCurrency> = {
+  '£':   'GBP',
+  '€':   'EUR',
+  '$':   'USD',
+  '¥':   'JPY',
+  'CHF': 'CHF',
+}
+
+
 export function validateCurrencyCode(input: string): ValidationResult<CurrencyCode> {
+  if (!input || typeof input !== 'string') {
+    return { valid: false, error: 'Input must be a non-empty string' }
+  }
+
   const upper = input.toUpperCase() as SupportedCurrency
 
   if (!SUPPORTED_CURRENCIES.includes(upper)) {
@@ -39,14 +45,8 @@ export function validateCurrencyCode(input: string): ValidationResult<CurrencyCo
   }
 }
 
-/**
- * Formats a number as a currency string using locale-aware formatting.
- *
- * @example
- * formatCurrency(1000.5, 'GBP', 'en-GB') // '£1,000.50'
- * formatCurrency(1000.5, 'EUR', 'de-DE') // '1.000,50 €'
- * formatCurrency(1000.5, 'USD', 'en-US') // '$1,000.50'
- */
+
+
 export function formatCurrency(
   amount: number,
   currency: SupportedCurrency,
@@ -62,28 +62,16 @@ export function formatCurrency(
   }).format(amount)
 }
 
-/**
- * Parses a formatted currency string back into amount and currency code.
- *
- * @example
- * parseMoney('£1,000.50') // { valid: true, amount: 1000.50, currency: 'GBP', formatted: '£1,000.50' }
- */
+
 export function parseMoney(input: string): MoneyResult {
-  const symbolMap: Record<string, SupportedCurrency> = {
-    '£': 'GBP',
-    '€': 'EUR',
-    '$': 'USD',
-    '¥': 'JPY',
-    'CHF': 'CHF',
-    'CA$': 'CAD',
-    'A$': 'AUD',
-    'NZ$': 'NZD',
+  if (!input || typeof input !== 'string') {
+    return { valid: false, error: 'Input must be a non-empty string' }
   }
 
   let currency: SupportedCurrency | undefined
   let cleaned = input.trim()
 
-  for (const [symbol, code] of Object.entries(symbolMap)) {
+  for (const [symbol, code] of Object.entries(SYMBOL_MAP)) {
     if (cleaned.startsWith(symbol) || cleaned.endsWith(symbol)) {
       currency = code
       cleaned = cleaned.replace(symbol, '').trim()
@@ -92,19 +80,15 @@ export function parseMoney(input: string): MoneyResult {
   }
 
   if (!currency) {
-    return { valid: false, error: 'Could not detect currency from input' }
+    return { valid: false, error: 'Could not detect currency from input. Expected a symbol like £, €, $, ¥' }
   }
 
-  // Remove thousands separators and normalise decimal
-  const normalised = cleaned.replace(/[,.\s]/g, (match, offset, str) => {
-    const lastSeparator = Math.max(str.lastIndexOf(','), str.lastIndexOf('.'))
-    return offset === lastSeparator ? '.' : ''
-  })
 
+  const normalised = cleaned.replace(/,/g, '')
   const amount = parseFloat(normalised)
 
   if (isNaN(amount)) {
-    return { valid: false, error: 'Could not parse amount from input' }
+    return { valid: false, error: `Could not parse amount from: "${cleaned}"` }
   }
 
   return {

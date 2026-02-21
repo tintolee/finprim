@@ -12,4 +12,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   treeshake: true,
+  external: ['react', 'zod'],
 })
