@@ -4,6 +4,8 @@ import { validateUKSortCode, validateUKAccountNumber } from '../sortcode'
 import { validateCurrencyCode } from '../currency'
 import { validateBIC } from '../bic'
 import { validateCardNumber } from '../card'
+import { validateEUVAT } from '../vat'
+import { validateUSRoutingNumber } from '../routing'
 
 type StringValidator = (val: string) => { valid: boolean; error?: string }
 
@@ -23,6 +25,8 @@ const accountNumberRefiner = refineWith(validateUKAccountNumber)
 const currencyRefiner = refineWith(validateCurrencyCode)
 const bicRefiner = refineWith(validateBIC)
 const cardNumberRefiner = refineWith(validateCardNumber)
+const vatRefiner = refineWith(validateEUVAT)
+const routingNumberRefiner = refineWith(validateUSRoutingNumber)
 
 export const ibanSchema = z.string().refine(ibanRefiner.validate, ibanRefiner.message)
 
@@ -37,6 +41,12 @@ export const currencySchema = z.string().refine(currencyRefiner.validate, curren
 export const bicSchema = z.string().refine(bicRefiner.validate, bicRefiner.message)
 
 export const cardNumberSchema = z.string().refine(cardNumberRefiner.validate, cardNumberRefiner.message)
+
+export const vatSchema = z.string().refine(vatRefiner.validate, vatRefiner.message)
+
+export const routingNumberSchema = z
+  .string()
+  .refine(routingNumberRefiner.validate, routingNumberRefiner.message)
 
 export const ukPaymentSchema = z.object({
   sortCode: sortCodeSchema,

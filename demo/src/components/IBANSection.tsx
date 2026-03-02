@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useIBANInput } from 'finprim/react'
-import { FieldGroup } from './FieldGroup.tsx'
+import { FieldGroup } from './FieldGroup'
 
 export function IBANSection() {
   const { formatted, valid, error, onChange: hookChange } = useIBANInput()

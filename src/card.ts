@@ -1,4 +1,5 @@
 import type { CardNumber, ValidationResult } from './types'
+import { guardStringInput } from './_guard'
 
 export type CardNetwork = 'Visa' | 'Mastercard' | 'Amex' | 'Discover' | 'Unknown'
 
@@ -22,11 +23,10 @@ function formatCardNumber(digits: string, network: CardNetwork): string {
 }
 
 export function validateCardNumber(input: string): CardValidationResult {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
-  const digits = input.replace(/[\s-]/g, '')
+  const digits = guarded.value.replace(/[\s-]/g, '')
 
   if (!/^\d+$/.test(digits)) {
     return { valid: false, error: 'Card number must contain only digits' }

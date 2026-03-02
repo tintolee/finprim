@@ -44,8 +44,9 @@ const EXAMPLES: FinprimExample[] = [
 ];
 
 export default function App() {
-  const [activeId, setActiveId] = useState<string>(EXAMPLES[0].id);
-  const activeExample = EXAMPLES.find((ex) => ex.id === activeId);
+  const [activeId, setActiveId] = useState<string>(EXAMPLES[0].id)
+  const activeExample = EXAMPLES.find((ex) => ex.id === activeId)
+  const ActiveComponent = activeExample?.component
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-900">
@@ -74,7 +75,7 @@ export default function App() {
         </header>
 
         <ExampleCard>
-          {activeExample ? <activeExample.component /> : <p>Select an example</p>}
+          {ActiveComponent ? <ActiveComponent /> : <p>Select an example</p>}
         </ExampleCard>
       </main>
     </div>

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useSortCodeInput, useAccountNumberInput } from 'finprim/react'
-import { FieldGroup } from './FieldGroup.tsx'
+import { FieldGroup } from './FieldGroup'
 
 function fakeEvent(value: string): React.ChangeEvent<HTMLInputElement> {
   return { target: { value } } as React.ChangeEvent<HTMLInputElement>

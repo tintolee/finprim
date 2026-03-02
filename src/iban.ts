@@ -1,4 +1,5 @@
 import type { IBAN, IBANValidationResult } from './types'
+import { guardStringInput } from './_guard'
 
 const IBAN_LENGTHS: Record<string, number> = {
   AL: 28, AD: 24, AT: 20, AZ: 28, BH: 22, BE: 16, BA: 20, BR: 29,
@@ -38,12 +39,17 @@ function formatIBANString(iban: string): string {
   return iban.replace(/(.{4})/g, '$1 ').trim()
 }
 
-export function validateIBAN(input: string): IBANValidationResult {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+export function formatIBAN(input: string): string {
+  if (typeof input !== 'string') return ''
+  const cleaned = input.replace(/\s/g, '').toUpperCase().slice(0, 34)
+  return formatIBANString(cleaned)
+}
 
-  const cleaned = input.replace(/\s/g, '').toUpperCase()
+export function validateIBAN(input: string): IBANValidationResult {
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
+
+  const cleaned = guarded.value.replace(/\s/g, '').toUpperCase()
 
   if (cleaned.length < 4) {
     return { valid: false, error: 'IBAN is too short' }

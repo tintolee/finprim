@@ -1,23 +1,22 @@
-import * as readline from 'readline'
-import path from "path";
+import * as readline from 'node:readline'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import * as dotenv from 'dotenv'
 import OpenAI from 'openai'
-import { validateIBAN } from 'finprim'
-import { validateUKSortCode, validateUKAccountNumber } from 'finprim'
-import { fileURLToPath } from "url";
+import { validateIBAN, validateUKSortCode, validateUKAccountNumber } from 'finprim'
 
-import * as dotenv from "dotenv";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-dotenv.config({
-  path: path.join(__dirname, ".env"),
-});
+dotenv.config({ path: path.join(__dirname, '.env') })
 
-console.log('API Key:', process.env.OPENAI_API_KEY)
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) {
+  console.error('Missing OPENAI_API_KEY. Set it in .env or the environment.')
+  process.exit(1)
+}
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+const openai = new OpenAI({ apiKey })
 
 const tools: OpenAI.Tool[] = [
   {

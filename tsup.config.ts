@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     'zod/index': 'src/zod/index.ts',
     'react/index': 'src/react/index.ts',
+    'nest/index': 'src/nest/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,
@@ -12,5 +13,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   treeshake: true,
-  external: ['react', 'zod'],
+  external: ['react', 'zod', '@nestjs/common'],
 })

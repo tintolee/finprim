@@ -7,6 +7,8 @@ export type AccountNumber = Brand<string, 'AccountNumber'>
 export type CurrencyCode = Brand<string, 'CurrencyCode'>
 export type BIC = Brand<string, 'BIC'>
 export type CardNumber = Brand<string, 'CardNumber'>
+export type VATNumber = Brand<string, 'VATNumber'>
+export type RoutingNumber = Brand<string, 'RoutingNumber'>
 
 export type SupportedCurrency =
   | 'GBP' | 'EUR' | 'USD' | 'JPY'
@@ -31,9 +33,18 @@ export function isValidationSuccess<T>(
   return result.valid === true
 }
 
+export function isValidationFailure<T>(
+  result: ValidationResult<T>
+): result is ValidationFailure {
+  return result.valid === false
+}
+
 export type IBANValidationSuccess = ValidationSuccess<IBAN> & { countryCode: string }
 export type IBANValidationResult = IBANValidationSuccess | ValidationFailure
 
 export type MoneyResult =
   | { valid: true; amount: number; currency: SupportedCurrency; formatted: string }
   | { valid: false; error: string }
+
+export type VATValidationSuccess = ValidationSuccess<VATNumber> & { countryCode: string }
+export type VATValidationResult = VATValidationSuccess | ValidationFailure

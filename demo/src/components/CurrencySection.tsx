@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useCurrencyInput } from 'finprim/react'
 import type { SupportedCurrency } from 'finprim'
-import { FieldGroup } from './FieldGroup.tsx'
+import { FieldGroup } from './FieldGroup'
 
 const CURRENCIES: SupportedCurrency[] = ['GBP', 'EUR', 'USD', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD']
 

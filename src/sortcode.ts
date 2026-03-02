@@ -1,11 +1,25 @@
 import type { SortCode, AccountNumber, ValidationResult } from './types'
+import { guardStringInput } from './_guard'
+
+export function formatSortCode(input: string): string {
+  if (typeof input !== 'string') return ''
+  const digits = input.replace(/[-\s]/g, '').slice(0, 6)
+  if (digits.length < 6) return digits
+  return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 6)}`
+}
+
+export function formatUKAccountNumber(input: string): string {
+  if (typeof input !== 'string') return ''
+  const digits = input.replace(/\s/g, '').slice(0, 8)
+  if (digits.length < 8) return digits
+  return `${digits.slice(0, 4)} ${digits.slice(4, 8)}`
+}
 
 export function validateUKSortCode(input: string): ValidationResult<SortCode> {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
-  const cleaned = input.replace(/[-\s]/g, '')
+  const cleaned = guarded.value.replace(/[-\s]/g, '')
 
   if (!/^\d{6}$/.test(cleaned)) {
     return {
@@ -24,11 +38,10 @@ export function validateUKSortCode(input: string): ValidationResult<SortCode> {
 }
 
 export function validateUKAccountNumber(input: string): ValidationResult<AccountNumber> {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
-  const cleaned = input.replace(/\s/g, '')
+  const cleaned = guarded.value.replace(/\s/g, '')
 
   if (!/^\d{8}$/.test(cleaned)) {
     return {

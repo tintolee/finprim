@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useCreditCardInput } from 'finprim/react'
 import type { CardIssuer } from 'finprim'
-import { FieldGroup } from './FieldGroup.tsx'
+import { FieldGroup } from './FieldGroup'
 
 function issuerLabel(issuer: CardIssuer): string {
   switch (issuer) {

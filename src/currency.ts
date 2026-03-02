@@ -1,4 +1,5 @@
 import type { CurrencyCode, SupportedCurrency, MoneyResult, ValidationResult } from './types'
+import { guardStringInput } from './_guard'
 
 export const SUPPORTED_CURRENCIES: SupportedCurrency[] = [
   'GBP', 'EUR', 'USD', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD',
@@ -24,16 +25,15 @@ const SYMBOL_MAP: Record<string, SupportedCurrency> = {
 }
 
 export function validateCurrencyCode(input: string): ValidationResult<CurrencyCode> {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
-  const upper = input.toUpperCase() as SupportedCurrency
+  const upper = guarded.value.toUpperCase() as SupportedCurrency
 
   if (!SUPPORTED_CURRENCIES.includes(upper)) {
     return {
       valid: false,
-      error: `Unsupported currency code: ${input}. Supported: ${SUPPORTED_CURRENCIES.join(', ')}`,
+      error: `Unsupported currency code: ${upper}. Supported: ${SUPPORTED_CURRENCIES.join(', ')}`,
     }
   }
 
@@ -49,6 +49,9 @@ export function formatCurrency(
   currency: SupportedCurrency,
   locale?: string
 ): string {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) {
+    return ''
+  }
   const resolvedLocale = locale ?? CURRENCY_LOCALES[currency] ?? 'en-GB'
   return new Intl.NumberFormat(resolvedLocale, {
     style: 'currency',
@@ -59,12 +62,11 @@ export function formatCurrency(
 }
 
 export function parseMoney(input: string): MoneyResult {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
   let currency: SupportedCurrency | undefined
-  let cleaned = input.trim()
+  let cleaned = guarded.value.trim()
 
   for (const [symbol, code] of Object.entries(SYMBOL_MAP)) {
     if (cleaned.startsWith(symbol) || cleaned.endsWith(symbol)) {

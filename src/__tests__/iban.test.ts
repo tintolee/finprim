@@ -71,4 +71,11 @@ describe('validateIBAN', () => {
     const result = validateIBAN('')
     expect(result.valid).toBe(false)
   })
+
+  it('rejects input exceeding max safe length', () => {
+    const long = 'GB29' + '0'.repeat(260)
+    const result = validateIBAN(long)
+    expect(result.valid).toBe(false)
+    if (!result.valid) expect(result.error).toContain('exceed')
+  })
 })

@@ -1,9 +1,9 @@
-import { Header } from './components/Header.tsx'
-import { Footer } from './components/Footer.tsx'
-import { IBANSection } from './components/IBANSection.tsx'
-import { UKPaymentSection } from './components/UKPaymentSection.tsx'
-import { CreditCardSection } from './components/CreditCardSection.tsx'
-import { CurrencySection } from './components/CurrencySection.tsx'
+import { Header } from './components/Header'
+import { Footer } from './components/Footer'
+import { IBANSection } from './components/IBANSection'
+import { UKPaymentSection } from './components/UKPaymentSection'
+import { CreditCardSection } from './components/CreditCardSection'
+import { CurrencySection } from './components/CurrencySection'
 
 export default function App() {
   return (

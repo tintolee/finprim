@@ -38,6 +38,11 @@
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
+    },
+    "./nest": {
+      "types": "./dist/nest/index.d.ts",
+      "import": "./dist/nest/index.mjs",
+      "require": "./dist/nest/index.js"
     }
   },
   "files": [
@@ -54,6 +59,7 @@
     "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "devDependencies": {
+    "@nestjs/common": "^10.0.0",
     "@testing-library/react": "^14.3.1",
     "@types/react": "^18.0.0",
     "jsdom": "^28.1.0",
@@ -66,13 +72,17 @@
   },
   "peerDependencies": {
     "react": ">=17.0.0",
-    "zod": ">=3.0.0"
+    "zod": ">=3.0.0",
+    "@nestjs/common": ">=10.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {
       "optional": true
     },
     "react": {
+      "optional": true
+    },
+    "@nestjs/common": {
       "optional": true
     }
   }

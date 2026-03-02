@@ -1,13 +1,13 @@
 import type { BIC, ValidationResult } from './types'
+import { guardStringInput } from './_guard'
 
 const BIC_REGEX = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/
 
 export function validateBIC(input: string): ValidationResult<BIC> {
-  if (!input || typeof input !== 'string') {
-    return { valid: false, error: 'Input must be a non-empty string' }
-  }
+  const guarded = guardStringInput(input)
+  if (!guarded.ok) return { valid: false, error: guarded.error }
 
-  const cleaned = input.replace(/\s/g, '').toUpperCase()
+  const cleaned = guarded.value.replace(/\s/g, '').toUpperCase()
 
   if (cleaned.length !== 8 && cleaned.length !== 11) {
     return {

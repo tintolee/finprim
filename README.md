@@ -20,10 +20,15 @@ finprim is the open source version of what your team has already written three t
 - ✅ UK sort code and account number validation
 - ✅ BIC/SWIFT validation
 - ✅ Card number validation (Luhn, network detection, formatting)
+- ✅ EU VAT number format validation (member states)
+- ✅ US ABA routing number validation
+- ✅ Loan/EMI calculation and schedule
+- ✅ Format-only helpers (IBAN, sort code, account number) for display
 - ✅ Currency validation and formatting with locale support
 - ✅ Branded types for compile-time correctness
 - ✅ Zod schemas out of the box
 - ✅ Optional React hooks for form inputs
+- ✅ Optional NestJS validation pipes
 - ✅ Zero dependencies at the core
 - ✅ Tree-shakeable ESM and CJS builds
 - ✅ Fully typed
@@ -56,6 +61,13 @@ import {
   validateBIC,
   validateCardNumber,
   validateCurrencyCode,
+  validateEUVAT,
+  validateUSRoutingNumber,
+  formatIBAN,
+  formatSortCode,
+  formatUKAccountNumber,
+  calculateEMI,
+  getLoanSchedule,
 } from 'finprim'
 
 const iban = validateIBAN('GB29NWBK60161331926819')
@@ -69,6 +81,19 @@ const account = validateUKAccountNumber('31926819')
 
 const card = validateCardNumber('4532015112830366')
 // { valid: true, value: '...', formatted: '4532 0151 1283 0366', network: 'Visa', last4: '0366' }
+
+const vat = validateEUVAT('DE123456789')
+// { valid: true, value: 'DE123456789', formatted: 'DE 123456789', countryCode: 'DE' }
+
+const routing = validateUSRoutingNumber('021000021')
+// { valid: true, value: '021000021', formatted: '021000021' }
+
+formatIBAN('GB29NWBK60161331926819')        // 'GB29 NWBK 6016 1331 9268 19'
+formatSortCode('601613')                    // '60-16-13'
+formatUKAccountNumber('31926819')           // '3192 6819'
+
+const emi = calculateEMI(100_000, 10, 12)   // monthly payment
+const schedule = getLoanSchedule(100_000, 10, 12)  // array of { month, payment, principal, interest, balance }
 ```
 
 ### Currency Formatting
@@ -101,7 +126,7 @@ if (iban.valid) {
 ### Zod Schemas
 
 ```ts
-import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema } from 'finprim/zod'
+import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema, vatSchema, routingNumberSchema } from 'finprim/zod'
 
 const PaymentSchema = z.object({
   iban: ibanSchema,
@@ -132,6 +157,20 @@ function PaymentForm() {
 }
 ```
 
+### NestJS Pipes
+
+```ts
+import { IbanValidationPipe, SortCodeValidationPipe, createValidationPipe } from 'finprim/nest'
+import { validateIBAN } from 'finprim'
+
+@Get('iban/:iban')
+findByIban(@Param('iban', IbanValidationPipe) iban: string) {
+  return this.service.findByIban(iban)
+}
+
+const MyPipe = createValidationPipe(validateIBAN)
+```
+
 ---
 
 ## API Reference
@@ -146,8 +185,25 @@ function PaymentForm() {
 | `validateCurrencyCode(input)` | `string` | `ValidationResult<CurrencyCode>` |
 | `validateBIC(input)` | `string` | `ValidationResult<BIC>` |
 | `validateCardNumber(input)` | `string` | `CardValidationResult` (includes `network`, `last4` when valid) |
+| `validateEUVAT(input)` | `string` | `VATValidationResult` (includes `countryCode` when valid) |
+| `validateUSRoutingNumber(input)` | `string` | `ValidationResult<RoutingNumber>` |
 
-### Formatting
+### Formatting & display
+
+| Function | Input | Returns |
+|----------|-------|---------|
+| `formatIBAN(input)` | `string` | `string` (space-separated, no validation) |
+| `formatSortCode(input)` | `string` | `string` (XX-XX-XX) |
+| `formatUKAccountNumber(input)` | `string` | `string` (XXXX XXXX) |
+
+### Loan
+
+| Function | Input | Returns |
+|----------|-------|---------|
+| `calculateEMI(principal, annualRatePercent, months)` | `number`, `number`, `number` | `number` |
+| `getLoanSchedule(principal, annualRatePercent, months)` | `number`, `number`, `number` | `LoanScheduleEntry[]` |
+
+### Formatting (currency)
 
 | Function | Input | Returns |
 |----------|-------|---------|
@@ -165,6 +221,7 @@ Validation results include a `formatted` string when valid (e.g. IBAN and card n
 | `finprim` | Core validators and formatters | none |
 | `finprim/zod` | Zod schemas | `zod` |
 | `finprim/react` | React hooks | `react` |
+| `finprim/nest` | NestJS validation pipes | `@nestjs/common` |
 
 ---
 
@@ -182,8 +239,11 @@ Validation results include a `formatted` string when valid (e.g. IBAN and card n
 
 - [x] SWIFT / BIC validation
 - [x] Luhn algorithm for card number validation
-- [ ] EU VAT number validation
-- [ ] NestJS pipe integration
+- [x] EU VAT number validation
+- [x] NestJS pipe integration
+- [x] US routing number validation
+- [x] Loan/EMI calculation
+- [x] Format-only helpers
 - [ ] More locale coverage
 
 ---
@@ -199,6 +259,15 @@ npm install
 npm test
 npm run dev
 ```
+
+---
+
+## Security
+
+- **Input length**: All string validators reject input longer than 256 characters to limit memory and CPU use.
+- **Type checking**: Validators require non-empty strings; numeric helpers (e.g. loan/currency) require finite numbers and sane bounds.
+- **No sensitive logging**: The library does not log or persist input; use it in a way that avoids logging full card or account numbers.
+- **Format helpers**: `formatIBAN`, `formatSortCode`, and `formatUKAccountNumber` cap input length and accept only strings to avoid abuse.
 
 ---
 
