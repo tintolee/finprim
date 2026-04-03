@@ -2,6 +2,24 @@ import { useState, useCallback } from 'react';
 
 // src/react/index.ts
 
+// src/_guard.ts
+var MAX_SAFE_INPUT_LENGTH = 256;
+function guardStringInput(input, label = "Input") {
+  if (input == null || typeof input !== "string") {
+    return { ok: false, error: `${label} must be a non-empty string` };
+  }
+  if (input.length === 0) {
+    return { ok: false, error: `${label} must be a non-empty string` };
+  }
+  if (input.length > MAX_SAFE_INPUT_LENGTH) {
+    return {
+      ok: false,
+      error: `${label} must not exceed ${MAX_SAFE_INPUT_LENGTH} characters`
+    };
+  }
+  return { ok: true, value: input };
+}
+
 // src/iban.ts
 var IBAN_LENGTHS = {
   AL: 28,
@@ -69,28 +87,29 @@ var IBAN_LENGTHS = {
   GB: 22,
   VG: 24
 };
+var LETTER_A = "A".codePointAt(0);
+var LETTER_Z = "Z".codePointAt(0);
+var LETTER_TO_DIGIT_OFFSET = 55;
 function mod97(value) {
-  let remainder = 0;
-  for (const char of value) {
-    remainder = (remainder * 10 + parseInt(char, 10)) % 97;
-  }
-  return remainder;
+  return [...value].reduce(
+    (remainder, char) => (remainder * 10 + Number.parseInt(char, 10)) % 97,
+    0
+  );
 }
 function ibanToDigits(iban) {
   const rearranged = iban.slice(4) + iban.slice(0, 4);
-  return rearranged.split("").map((char) => {
-    const code = char.charCodeAt(0);
-    return code >= 65 && code <= 90 ? (code - 55).toString() : char;
+  return [...rearranged].map((char) => {
+    const code = char.codePointAt(0) ?? 0;
+    return code >= LETTER_A && code <= LETTER_Z ? (code - LETTER_TO_DIGIT_OFFSET).toString() : char;
   }).join("");
 }
 function formatIBANString(iban) {
   return iban.replace(/(.{4})/g, "$1 ").trim();
 }
 function validateIBAN(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "").toUpperCase();
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "").toUpperCase();
   if (cleaned.length < 4) {
     return { valid: false, error: "IBAN is too short" };
   }
@@ -118,16 +137,16 @@ function validateIBAN(input) {
   return {
     valid: true,
     value: cleaned,
-    formatted: formatIBANString(cleaned)
+    formatted: formatIBANString(cleaned),
+    countryCode
   };
 }
 
 // src/sortcode.ts
 function validateUKSortCode(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/[-\s]/g, "");
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/[-\s]/g, "");
   if (!/^\d{6}$/.test(cleaned)) {
     return {
       valid: false,
@@ -142,10 +161,9 @@ function validateUKSortCode(input) {
   };
 }
 function validateUKAccountNumber(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "");
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "");
   if (!/^\d{8}$/.test(cleaned)) {
     return {
       valid: false,
@@ -172,6 +190,9 @@ var CURRENCY_LOCALES = {
   NZD: "en-NZ"
 };
 function formatCurrency(amount, currency, locale) {
+  if (typeof amount !== "number" || !Number.isFinite(amount)) {
+    return "";
+  }
   const resolvedLocale = locale ?? CURRENCY_LOCALES[currency] ?? "en-GB";
   return new Intl.NumberFormat(resolvedLocale, {
     style: "currency",
@@ -184,10 +205,9 @@ function formatCurrency(amount, currency, locale) {
 // src/bic.ts
 var BIC_REGEX = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
 function validateBIC(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "").toUpperCase();
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "").toUpperCase();
   if (cleaned.length !== 8 && cleaned.length !== 11) {
     return {
       valid: false,
@@ -211,6 +231,57 @@ function validateBIC(input) {
   };
 }
 
+// src/card.ts
+function detectNetwork(digits) {
+  if (/^4/.test(digits)) return "Visa";
+  if (/^5[1-5]/.test(digits) || /^2[2-7]/.test(digits)) return "Mastercard";
+  if (/^3[47]/.test(digits)) return "Amex";
+  if (/^6(?:011|5)/.test(digits)) return "Discover";
+  return "Unknown";
+}
+function formatCardNumber(digits, network) {
+  if (network === "Amex") {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 10)} ${digits.slice(10, 15)}`;
+  }
+  return digits.replace(/(.{4})/g, "$1 ").trim();
+}
+function validateCardNumber(input) {
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const digits = guarded.value.replace(/[\s-]/g, "");
+  if (!/^\d+$/.test(digits)) {
+    return { valid: false, error: "Card number must contain only digits" };
+  }
+  if (digits.length < 13 || digits.length > 19) {
+    return {
+      valid: false,
+      error: `Card number length invalid. Expected 13-19 digits, got ${digits.length}`
+    };
+  }
+  let sum = 0;
+  let shouldDouble = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let digit = Number.parseInt(digits[i], 10);
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+  if (sum % 10 !== 0) {
+    return { valid: false, error: "Card number failed Luhn check \u2014 this is not a valid card number" };
+  }
+  const network = detectNetwork(digits);
+  return {
+    valid: true,
+    value: digits,
+    formatted: formatCardNumber(digits, network),
+    network,
+    last4: digits.slice(-4)
+  };
+}
+
 // src/react/index.ts
 function useValidatedInput(validator, minLength = 1) {
   const [value, setValue] = useState("");
@@ -227,11 +298,12 @@ function useValidatedInput(validator, minLength = 1) {
     },
     [validator, minLength]
   );
+  const error = result?.valid === false ? result.error : null;
   return {
     value,
     formatted: result?.valid ? result.formatted : value,
     valid: result === null ? null : result.valid,
-    error: result && !result.valid ? result.error : null,
+    error,
     onChange,
     result
   };
@@ -248,12 +320,16 @@ function useAccountNumberInput() {
 function useBICInput() {
   return useValidatedInput(validateBIC, 8);
 }
+function useCardNumberInput() {
+  return useValidatedInput(validateCardNumber, 8);
+}
 function useCurrencyInput(currency, locale) {
   const [rawValue, setRawValue] = useState(null);
   const onChange = useCallback(
     (e) => {
-      const num = parseFloat(e.target.value.replace(/[^0-9.]/g, ""));
-      setRawValue(isNaN(num) ? null : num);
+      const digits = e.target.value.replace(/[^0-9.]/g, "");
+      const num = Number.parseFloat(digits);
+      setRawValue(Number.isNaN(num) ? null : num);
     },
     []
   );
@@ -261,6 +337,6 @@ function useCurrencyInput(currency, locale) {
   return { rawValue, formatted, onChange };
 }
 
-export { useAccountNumberInput, useBICInput, useCurrencyInput, useIBANInput, useSortCodeInput };
+export { useAccountNumberInput, useBICInput, useCardNumberInput, useCurrencyInput, useIBANInput, useSortCodeInput };
 //# sourceMappingURL=index.mjs.map
 //# sourceMappingURL=index.mjs.map

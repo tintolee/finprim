@@ -2,6 +2,24 @@ import { z } from 'zod';
 
 // src/zod/index.ts
 
+// src/_guard.ts
+var MAX_SAFE_INPUT_LENGTH = 256;
+function guardStringInput(input, label = "Input") {
+  if (input == null || typeof input !== "string") {
+    return { ok: false, error: `${label} must be a non-empty string` };
+  }
+  if (input.length === 0) {
+    return { ok: false, error: `${label} must be a non-empty string` };
+  }
+  if (input.length > MAX_SAFE_INPUT_LENGTH) {
+    return {
+      ok: false,
+      error: `${label} must not exceed ${MAX_SAFE_INPUT_LENGTH} characters`
+    };
+  }
+  return { ok: true, value: input };
+}
+
 // src/iban.ts
 var IBAN_LENGTHS = {
   AL: 28,
@@ -69,28 +87,29 @@ var IBAN_LENGTHS = {
   GB: 22,
   VG: 24
 };
+var LETTER_A = "A".codePointAt(0);
+var LETTER_Z = "Z".codePointAt(0);
+var LETTER_TO_DIGIT_OFFSET = 55;
 function mod97(value) {
-  let remainder = 0;
-  for (const char of value) {
-    remainder = (remainder * 10 + parseInt(char, 10)) % 97;
-  }
-  return remainder;
+  return [...value].reduce(
+    (remainder, char) => (remainder * 10 + Number.parseInt(char, 10)) % 97,
+    0
+  );
 }
 function ibanToDigits(iban) {
   const rearranged = iban.slice(4) + iban.slice(0, 4);
-  return rearranged.split("").map((char) => {
-    const code = char.charCodeAt(0);
-    return code >= 65 && code <= 90 ? (code - 55).toString() : char;
+  return [...rearranged].map((char) => {
+    const code = char.codePointAt(0) ?? 0;
+    return code >= LETTER_A && code <= LETTER_Z ? (code - LETTER_TO_DIGIT_OFFSET).toString() : char;
   }).join("");
 }
 function formatIBANString(iban) {
   return iban.replace(/(.{4})/g, "$1 ").trim();
 }
 function validateIBAN(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "").toUpperCase();
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "").toUpperCase();
   if (cleaned.length < 4) {
     return { valid: false, error: "IBAN is too short" };
   }
@@ -118,16 +137,16 @@ function validateIBAN(input) {
   return {
     valid: true,
     value: cleaned,
-    formatted: formatIBANString(cleaned)
+    formatted: formatIBANString(cleaned),
+    countryCode
   };
 }
 
 // src/sortcode.ts
 function validateUKSortCode(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/[-\s]/g, "");
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/[-\s]/g, "");
   if (!/^\d{6}$/.test(cleaned)) {
     return {
       valid: false,
@@ -142,10 +161,9 @@ function validateUKSortCode(input) {
   };
 }
 function validateUKAccountNumber(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "");
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "");
   if (!/^\d{8}$/.test(cleaned)) {
     return {
       valid: false,
@@ -172,14 +190,13 @@ var SUPPORTED_CURRENCIES = [
   "NZD"
 ];
 function validateCurrencyCode(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const upper = input.toUpperCase();
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const upper = guarded.value.toUpperCase();
   if (!SUPPORTED_CURRENCIES.includes(upper)) {
     return {
       valid: false,
-      error: `Unsupported currency code: ${input}. Supported: ${SUPPORTED_CURRENCIES.join(", ")}`
+      error: `Unsupported currency code: ${upper}. Supported: ${SUPPORTED_CURRENCIES.join(", ")}`
     };
   }
   return {
@@ -192,10 +209,9 @@ function validateCurrencyCode(input) {
 // src/bic.ts
 var BIC_REGEX = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
 function validateBIC(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const cleaned = input.replace(/\s/g, "").toUpperCase();
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "").toUpperCase();
   if (cleaned.length !== 8 && cleaned.length !== 11) {
     return {
       valid: false,
@@ -234,10 +250,9 @@ function formatCardNumber(digits, network) {
   return digits.replace(/(.{4})/g, "$1 ").trim();
 }
 function validateCardNumber(input) {
-  if (!input || typeof input !== "string") {
-    return { valid: false, error: "Input must be a non-empty string" };
-  }
-  const digits = input.replace(/[\s-]/g, "");
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const digits = guarded.value.replace(/[\s-]/g, "");
   if (!/^\d+$/.test(digits)) {
     return { valid: false, error: "Card number must contain only digits" };
   }
@@ -250,7 +265,7 @@ function validateCardNumber(input) {
   let sum = 0;
   let shouldDouble = false;
   for (let i = digits.length - 1; i >= 0; i--) {
-    let digit = parseInt(digits[i], 10);
+    let digit = Number.parseInt(digits[i], 10);
     if (shouldDouble) {
       digit *= 2;
       if (digit > 9) digit -= 9;
@@ -271,22 +286,113 @@ function validateCardNumber(input) {
   };
 }
 
+// src/vat.ts
+var EU_VAT_PATTERNS = {
+  AT: /^ATU\d{8}$/,
+  BE: /^BE0?\d{9}$/,
+  BG: /^BG\d{9,10}$/,
+  CY: /^CY\d{8}[A-Z]$/,
+  CZ: /^CZ\d{8,10}$/,
+  DE: /^DE\d{9}$/,
+  DK: /^DK\d{8}$/,
+  EE: /^EE\d{9}$/,
+  EL: /^EL\d{9}$/,
+  ES: /^ES[A-Z0-9]\d{7}[A-Z0-9]$/,
+  FI: /^FI\d{8}$/,
+  FR: /^FR[A-HJ-NP-Z0-9]{2}\d{9}$/,
+  GR: /^GR\d{9}$/,
+  HR: /^HR\d{11}$/,
+  HU: /^HU\d{8}$/,
+  IE: /^IE\d[A-Z0-9]\d{5}[A-Z]$|^IE\d{7}[A-W][A-I0-9]?$/,
+  IT: /^IT\d{11}$/,
+  LT: /^LT\d{9}$|^LT\d{12}$/,
+  LU: /^LU\d{8}$/,
+  LV: /^LV\d{11}$/,
+  MT: /^MT\d{8}$/,
+  NL: /^NL\d{9}B\d{2}$/,
+  PL: /^PL\d{10}$/,
+  PT: /^PT\d{9}$/,
+  RO: /^RO\d{2,10}$/,
+  SE: /^SE\d{12}$/,
+  SI: /^SI\d{8}$/,
+  SK: /^SK\d{10}$/
+};
+function validateEUVAT(input) {
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "").toUpperCase();
+  if (cleaned.length < 4) {
+    return { valid: false, error: "VAT number is too short" };
+  }
+  const countryCode = cleaned.slice(0, 2);
+  const pattern = EU_VAT_PATTERNS[countryCode];
+  if (!pattern) {
+    return { valid: false, error: `Unsupported EU VAT country code: ${countryCode}` };
+  }
+  if (!pattern.test(cleaned)) {
+    return { valid: false, error: `Invalid VAT format for ${countryCode}` };
+  }
+  const formatted = `${countryCode} ${cleaned.slice(2)}`;
+  return {
+    valid: true,
+    value: cleaned,
+    formatted,
+    countryCode
+  };
+}
+
+// src/routing.ts
+function routingChecksum(digits) {
+  if (digits.length !== 9) return false;
+  const sum = 3 * (Number(digits[0]) + Number(digits[3]) + Number(digits[6])) + 7 * (Number(digits[1]) + Number(digits[4]) + Number(digits[7])) + Number(digits[2]) + Number(digits[5]) + Number(digits[8]);
+  return sum % 10 === 0;
+}
+function validateUSRoutingNumber(input) {
+  const guarded = guardStringInput(input);
+  if (!guarded.ok) return { valid: false, error: guarded.error };
+  const cleaned = guarded.value.replace(/\s/g, "");
+  if (!/^\d{9}$/.test(cleaned)) {
+    return {
+      valid: false,
+      error: "US routing number must be exactly 9 digits"
+    };
+  }
+  if (!routingChecksum(cleaned)) {
+    return { valid: false, error: "US routing number checksum is invalid" };
+  }
+  return {
+    valid: true,
+    value: cleaned,
+    formatted: cleaned
+  };
+}
+
 // src/zod/index.ts
 function refineWith(validator) {
   return {
     validate: (val) => validator(val).valid,
     message: (val) => {
       const result = validator(val);
-      return { message: result.valid ? "" : result.error };
+      return { message: result.valid ? "" : result.error ?? "Invalid" };
     }
   };
 }
-var ibanSchema = z.string().refine(refineWith(validateIBAN).validate, refineWith(validateIBAN).message);
-var sortCodeSchema = z.string().refine(refineWith(validateUKSortCode).validate, refineWith(validateUKSortCode).message);
-var accountNumberSchema = z.string().refine(refineWith(validateUKAccountNumber).validate, refineWith(validateUKAccountNumber).message);
-var currencySchema = z.string().refine(refineWith(validateCurrencyCode).validate, refineWith(validateCurrencyCode).message);
-var bicSchema = z.string().refine(refineWith(validateBIC).validate, refineWith(validateBIC).message);
-var cardNumberSchema = z.string().refine(refineWith(validateCardNumber).validate, refineWith(validateCardNumber).message);
+var ibanRefiner = refineWith(validateIBAN);
+var sortCodeRefiner = refineWith(validateUKSortCode);
+var accountNumberRefiner = refineWith(validateUKAccountNumber);
+var currencyRefiner = refineWith(validateCurrencyCode);
+var bicRefiner = refineWith(validateBIC);
+var cardNumberRefiner = refineWith(validateCardNumber);
+var vatRefiner = refineWith(validateEUVAT);
+var routingNumberRefiner = refineWith(validateUSRoutingNumber);
+var ibanSchema = z.string().refine(ibanRefiner.validate, ibanRefiner.message);
+var sortCodeSchema = z.string().refine(sortCodeRefiner.validate, sortCodeRefiner.message);
+var accountNumberSchema = z.string().refine(accountNumberRefiner.validate, accountNumberRefiner.message);
+var currencySchema = z.string().refine(currencyRefiner.validate, currencyRefiner.message);
+var bicSchema = z.string().refine(bicRefiner.validate, bicRefiner.message);
+var cardNumberSchema = z.string().refine(cardNumberRefiner.validate, cardNumberRefiner.message);
+var vatSchema = z.string().refine(vatRefiner.validate, vatRefiner.message);
+var routingNumberSchema = z.string().refine(routingNumberRefiner.validate, routingNumberRefiner.message);
 var ukPaymentSchema = z.object({
   sortCode: sortCodeSchema,
   accountNumber: accountNumberSchema,
@@ -304,6 +410,6 @@ var internationalPaymentSchema = z.object({
   payeeName: z.string().min(1).max(140).optional()
 });
 
-export { accountNumberSchema, bicSchema, cardNumberSchema, currencySchema, ibanSchema, internationalPaymentSchema, sortCodeSchema, ukPaymentSchema };
+export { accountNumberSchema, bicSchema, cardNumberSchema, currencySchema, ibanSchema, internationalPaymentSchema, routingNumberSchema, sortCodeSchema, ukPaymentSchema, vatSchema };
 //# sourceMappingURL=index.mjs.map
 //# sourceMappingURL=index.mjs.map

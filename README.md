@@ -1,55 +1,89 @@
-# finprim
+<p align="center">
+  <h1 align="center">finprim</h1>
+  <p align="center">Financial primitives for modern TypeScript applications.</p>
+</p>
 
-**Financial primitives for modern TypeScript applications.**
+<p align="center">
+  <a href="https://www.npmjs.com/package/finprim"><img src="https://img.shields.io/npm/v/finprim.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/finprim"><img src="https://img.shields.io/npm/dm/finprim.svg" alt="npm downloads"></a>
+  <a href="https://github.com/tintolee/finprim/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/finprim.svg" alt="license"></a>
+  <a href="https://github.com/tintolee/finprim"><img src="https://img.shields.io/github/stars/tintolee/finprim?style=social" alt="GitHub stars"></a>
+  <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="zero dependencies">
+  <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript strict">
+</p>
 
-A unified, production-grade TypeScript library for validating and formatting financial data. No more stitching together five different packages. No more custom glue code. Just clean, typed, fintech-first utilities that work anywhere TypeScript runs.
-
----
-
-## Why finprim?
-
-Every fintech team builds this internally. Sort code validation here, an IBAN check there, a custom currency formatter somewhere else. It's fragmented, inconsistent, and expensive to maintain.
-
-finprim is the open source version of what your team has already written three times.
-
----
-
-## Features
-
-- ✅ IBAN validation and formatting (80+ countries, with country code)
-- ✅ UK sort code and account number validation
-- ✅ BIC/SWIFT validation
-- ✅ Card number validation (Luhn, network detection, formatting)
-- ✅ EU VAT number format validation (member states)
-- ✅ US ABA routing number validation
-- ✅ Loan/EMI calculation and schedule
-- ✅ Format-only helpers (IBAN, sort code, account number) for display
-- ✅ Currency validation and formatting with locale support
-- ✅ Branded types for compile-time correctness
-- ✅ Zod schemas out of the box
-- ✅ Optional React hooks for form inputs
-- ✅ Optional NestJS validation pipes
-- ✅ Zero dependencies at the core
-- ✅ Tree-shakeable ESM and CJS builds
-- ✅ Fully typed
+<p align="center">
+  <b>IBAN &middot; BIC/SWIFT &middot; Card &middot; Sort Code &middot; VAT &middot; Routing Number &middot; Loan/EMI &middot; Currency</b><br/>
+  One library. Zero dependencies. Fully typed.
+</p>
 
 ---
 
-## Installation
+> Every fintech team builds this internally. Sort code validation here, an IBAN check there, a custom currency formatter somewhere else. It's fragmented, inconsistent, and expensive to maintain. **finprim is the open source version of what your team has already written three times.**
+
+---
+
+## Quick Start
 
 ```bash
 npm install finprim
 ```
 
-For Zod integration:
+```ts
+import { validateIBAN, validateCardNumber, formatCurrency } from 'finprim'
 
-```bash
-npm install finprim zod
+const iban = validateIBAN('GB29NWBK60161331926819')
+// { valid: true, value: 'GB29NWBK60161331926819', formatted: 'GB29 NWBK 6016 1331 9268 19', countryCode: 'GB' }
+
+const card = validateCardNumber('4532015112830366')
+// { valid: true, formatted: '4532 0151 1283 0366', network: 'Visa', last4: '0366' }
+
+formatCurrency(1000.5, 'GBP', 'en-GB')
+// '£1,000.50'
 ```
+
+**That's it.** No config. No setup. Just import and use.
 
 ---
 
-## Usage
+## Why finprim?
+
+| Problem | finprim |
+|---|---|
+| 5 different npm packages for financial validation | **One unified library** |
+| Custom glue code between validators | **Consistent API across all validators** |
+| Runtime type confusion | **Branded TypeScript types** for compile-time safety |
+| No framework integration | **Built-in Zod schemas, React hooks, NestJS pipes** |
+| Heavy dependency trees | **Zero runtime dependencies** |
+
+---
+
+## Features
+
+- **Validators** - IBAN (80+ countries), BIC/SWIFT, UK sort code & account number, card number (Luhn + network detection), EU VAT, US ABA routing number
+- **Loan math** - EMI calculation and full amortization schedules
+- **Formatting** - Display-ready IBAN, sort code, account number, and multi-locale currency formatting
+- **Branded types** - Compile-time correctness that prevents invalid data from flowing through your system
+- **Framework integrations** - Zod schemas, React hooks, NestJS pipes (all optional)
+- **Production-ready** - Input length guards, type checking, no sensitive data logging
+- **Lightweight** - Zero dependencies, tree-shakeable ESM + CJS
+
+---
+
+## Integrations
+
+finprim works standalone or plugs into your existing stack:
+
+| Import path | What it contains | Extra dependency |
+|---|---|---|
+| `finprim` | Core validators, formatters, loan math | none |
+| `finprim/zod` | Zod schemas for validation pipelines | `zod` |
+| `finprim/react` | React hooks for form inputs | `react` |
+| `finprim/nest` | NestJS validation pipes | `@nestjs/common` |
+
+---
+
+## Usage Examples
 
 ### Validation
 
@@ -63,70 +97,75 @@ import {
   validateCurrencyCode,
   validateEUVAT,
   validateUSRoutingNumber,
-  formatIBAN,
-  formatSortCode,
-  formatUKAccountNumber,
-  calculateEMI,
-  getLoanSchedule,
 } from 'finprim'
 
-const iban = validateIBAN('GB29NWBK60161331926819')
+validateIBAN('GB29NWBK60161331926819')
 // { valid: true, value: 'GB29NWBK60161331926819', formatted: 'GB29 NWBK 6016 1331 9268 19', countryCode: 'GB' }
 
-const sortCode = validateUKSortCode('60-16-13')
+validateUKSortCode('60-16-13')
 // { valid: true, value: '601613', formatted: '60-16-13' }
 
-const account = validateUKAccountNumber('31926819')
+validateUKAccountNumber('31926819')
 // { valid: true, value: '31926819', formatted: '3192 6819' }
 
-const card = validateCardNumber('4532015112830366')
-// { valid: true, value: '...', formatted: '4532 0151 1283 0366', network: 'Visa', last4: '0366' }
+validateCardNumber('4532015112830366')
+// { valid: true, formatted: '4532 0151 1283 0366', network: 'Visa', last4: '0366' }
 
-const vat = validateEUVAT('DE123456789')
+validateEUVAT('DE123456789')
 // { valid: true, value: 'DE123456789', formatted: 'DE 123456789', countryCode: 'DE' }
 
-const routing = validateUSRoutingNumber('021000021')
+validateUSRoutingNumber('021000021')
 // { valid: true, value: '021000021', formatted: '021000021' }
-
-formatIBAN('GB29NWBK60161331926819')        // 'GB29 NWBK 6016 1331 9268 19'
-formatSortCode('601613')                    // '60-16-13'
-formatUKAccountNumber('31926819')           // '3192 6819'
-
-const emi = calculateEMI(100_000, 10, 12)   // monthly payment
-const schedule = getLoanSchedule(100_000, 10, 12)  // array of { month, payment, principal, interest, balance }
 ```
 
-### Currency Formatting
+### Formatting & Display
 
 ```ts
-import { formatCurrency, parseMoney } from 'finprim'
+import { formatIBAN, formatSortCode, formatUKAccountNumber, formatCurrency, parseMoney } from 'finprim'
 
-formatCurrency(1000.5, 'GBP', 'en-GB')  // '£1,000.50'
-formatCurrency(1000.5, 'EUR', 'de-DE')  // '1.000,50 €'
-formatCurrency(1000.5, 'USD', 'en-US')  // '$1,000.50'
+formatIBAN('GB29NWBK60161331926819')        // 'GB29 NWBK 6016 1331 9268 19'
+formatSortCode('601613')                     // '60-16-13'
+formatUKAccountNumber('31926819')            // '3192 6819'
 
-parseMoney('£1,000.50')  // { valid: true, amount: 1000.50, currency: 'GBP', formatted: '£1,000.50' }
+formatCurrency(1000.5, 'GBP', 'en-GB')      // '£1,000.50'
+formatCurrency(1000.5, 'EUR', 'de-DE')       // '1.000,50 €'
+formatCurrency(1000.5, 'USD', 'en-US')       // '$1,000.50'
+
+parseMoney('£1,000.50')
+// { valid: true, amount: 1000.50, currency: 'GBP', formatted: '£1,000.50' }
+```
+
+### Loan / EMI Calculation
+
+```ts
+import { calculateEMI, getLoanSchedule } from 'finprim'
+
+calculateEMI(100_000, 10, 12)
+// Monthly payment amount
+
+getLoanSchedule(100_000, 10, 12)
+// [{ month, payment, principal, interest, balance }, ...]
 ```
 
 ### Branded Types
 
 ```ts
-import type { IBAN, SortCode, AccountNumber, CurrencyCode } from 'finprim'
+import type { IBAN, SortCode, AccountNumber } from 'finprim'
 
 // Invalid data cannot be passed where valid data is expected
-function processPayment(iban: IBAN, amount: number) { ... }
+function processPayment(iban: IBAN, amount: number) { /* ... */ }
 
-// This forces validation before use
-const iban = validateIBAN(input)
-if (iban.valid) {
-  processPayment(iban.value, 100) // iban.value is typed as IBAN
+const result = validateIBAN(input)
+if (result.valid) {
+  processPayment(result.value, 100) // result.value is typed as IBAN
 }
 ```
 
 ### Zod Schemas
 
 ```ts
-import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema, vatSchema, routingNumberSchema } from 'finprim/zod'
+import { z } from 'zod'
+import { ibanSchema, sortCodeSchema, accountNumberSchema, currencySchema } from 'finprim/zod'
 
 const PaymentSchema = z.object({
   iban: ibanSchema,
@@ -139,20 +178,20 @@ const PaymentSchema = z.object({
 
 ### React Hooks
 
-```ts
+```tsx
 import { useIBANInput, useCardNumberInput, useCurrencyInput } from 'finprim/react'
 
 function PaymentForm() {
   const iban = useIBANInput()
   const card = useCardNumberInput()
-  const { rawValue, formatted, onChange } = useCurrencyInput('GBP', 'en-GB')
+  const currency = useCurrencyInput('GBP', 'en-GB')
 
   return (
-    <>
+    <form>
       <input value={iban.value} onChange={iban.onChange} aria-invalid={iban.valid === false} />
       <input value={card.formatted} onChange={card.onChange} aria-invalid={card.valid === false} />
-      <input value={formatted} onChange={onChange} />
-    </>
+      <input value={currency.formatted} onChange={currency.onChange} />
+    </form>
   )
 }
 ```
@@ -168,6 +207,7 @@ findByIban(@Param('iban', IbanValidationPipe) iban: string) {
   return this.service.findByIban(iban)
 }
 
+// Create a custom pipe from any validator
 const MyPipe = createValidationPipe(validateIBAN)
 ```
 
@@ -179,95 +219,74 @@ const MyPipe = createValidationPipe(validateIBAN)
 
 | Function | Input | Returns |
 |----------|-------|---------|
-| `validateIBAN(input)` | `string` | `IBANValidationResult` (includes `countryCode` when valid) |
+| `validateIBAN(input)` | `string` | `IBANValidationResult` (includes `countryCode`) |
 | `validateUKSortCode(input)` | `string` | `ValidationResult<SortCode>` |
 | `validateUKAccountNumber(input)` | `string` | `ValidationResult<AccountNumber>` |
 | `validateCurrencyCode(input)` | `string` | `ValidationResult<CurrencyCode>` |
 | `validateBIC(input)` | `string` | `ValidationResult<BIC>` |
-| `validateCardNumber(input)` | `string` | `CardValidationResult` (includes `network`, `last4` when valid) |
-| `validateEUVAT(input)` | `string` | `VATValidationResult` (includes `countryCode` when valid) |
+| `validateCardNumber(input)` | `string` | `CardValidationResult` (includes `network`, `last4`) |
+| `validateEUVAT(input)` | `string` | `VATValidationResult` (includes `countryCode`) |
 | `validateUSRoutingNumber(input)` | `string` | `ValidationResult<RoutingNumber>` |
 
-### Formatting & display
+### Formatting
 
 | Function | Input | Returns |
 |----------|-------|---------|
-| `formatIBAN(input)` | `string` | `string` (space-separated, no validation) |
+| `formatIBAN(input)` | `string` | `string` (space-separated) |
 | `formatSortCode(input)` | `string` | `string` (XX-XX-XX) |
 | `formatUKAccountNumber(input)` | `string` | `string` (XXXX XXXX) |
+| `formatCurrency(amount, currency, locale?)` | `number`, `SupportedCurrency`, `string?` | `string` |
+| `parseMoney(input)` | `string` | `MoneyResult` |
 
 ### Loan
 
 | Function | Input | Returns |
 |----------|-------|---------|
-| `calculateEMI(principal, annualRatePercent, months)` | `number`, `number`, `number` | `number` |
-| `getLoanSchedule(principal, annualRatePercent, months)` | `number`, `number`, `number` | `LoanScheduleEntry[]` |
-
-### Formatting (currency)
-
-| Function | Input | Returns |
-|----------|-------|---------|
-| `formatCurrency(amount, currency, locale?)` | `number`, `SupportedCurrency`, `string?` | `string` |
-| `parseMoney(input)` | `string` | `MoneyResult` |
-
-Validation results include a `formatted` string when valid (e.g. IBAN and card numbers are space-separated).
-
----
-
-## Packages
-
-| Import path | What it contains | Extra dependency |
-|---|---|---|
-| `finprim` | Core validators and formatters | none |
-| `finprim/zod` | Zod schemas | `zod` |
-| `finprim/react` | React hooks | `react` |
-| `finprim/nest` | NestJS validation pipes | `@nestjs/common` |
-
----
-
-## Tech Stack
-
-- TypeScript
-- tsup (build)
-- Vitest (testing)
-- React (optional hooks subpath)
-- Zod (optional schema subpath)
+| `calculateEMI(principal, rate, months)` | `number`, `number`, `number` | `number` |
+| `getLoanSchedule(principal, rate, months)` | `number`, `number`, `number` | `LoanScheduleEntry[]` |
 
 ---
 
 ## Roadmap
 
-- [x] SWIFT / BIC validation
-- [x] Luhn algorithm for card number validation
+- [x] IBAN validation (80+ countries)
+- [x] BIC/SWIFT validation
+- [x] Card number validation (Luhn + network detection)
 - [x] EU VAT number validation
-- [x] NestJS pipe integration
 - [x] US routing number validation
+- [x] UK sort code and account number validation
 - [x] Loan/EMI calculation
 - [x] Format-only helpers
+- [x] Currency formatting with locale support
+- [x] Branded TypeScript types
+- [x] Zod schema integration
+- [x] React hooks
+- [x] NestJS pipes
 - [ ] More locale coverage
-
----
-
-## Contributing
-
-Contributions are welcome. Please open an issue before submitting a pull request so we can discuss the change.
-
-```bash
-git clone https://github.com/YOUR_USERNAME/finprim
-cd finprim
-npm install
-npm test
-npm run dev
-```
+- [ ] SEPA credit transfer XML generation
+- [ ] ACH file format support
 
 ---
 
 ## Security
 
-- **Input length**: All string validators reject input longer than 256 characters to limit memory and CPU use.
-- **Type checking**: Validators require non-empty strings; numeric helpers (e.g. loan/currency) require finite numbers and sane bounds.
-- **No sensitive logging**: The library does not log or persist input; use it in a way that avoids logging full card or account numbers.
-- **Format helpers**: `formatIBAN`, `formatSortCode`, and `formatUKAccountNumber` cap input length and accept only strings to avoid abuse.
+- **Input length** - All string validators reject input longer than 256 characters
+- **Type checking** - Validators require non-empty strings; numeric helpers require finite numbers and sane bounds
+- **No sensitive logging** - The library does not log or persist input
+- **Format helpers** - Cap input length and accept only strings
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+```bash
+git clone https://github.com/tintolee/finprim.git
+cd finprim
+npm install
+npm test
+```
 
 ---
 

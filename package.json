@@ -1,24 +1,40 @@
 {
   "name": "finprim",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Financial primitives for modern TypeScript applications",
   "author": "Oluwatosin Adelaja , Silke Nodwell,Mohammead Hassani Sadiq, Nick Goddard ",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tintolee/finprim.git"
+    "url": "git+https://github.com/tintolee/finprim.git"
   },
   "keywords": [
     "fintech",
     "typescript",
     "iban",
     "sort-code",
+    "bic",
+    "swift",
     "currency",
     "validation",
     "formatting",
     "financial",
     "primitives",
-    "zod"
+    "zod",
+    "react",
+    "nestjs",
+    "payment",
+    "luhn",
+    "card-validation",
+    "credit-card",
+    "vat",
+    "routing-number",
+    "emi",
+    "loan",
+    "amortization",
+    "branded-types",
+    "bank",
+    "account-number"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
